@@ -19,6 +19,8 @@ module PrettyGit
           render_authors(result)
         when 'files'
           render_files(result)
+        when 'heatmap'
+          render_heatmap(result)
         else
           @io.puts result.inspect
         end

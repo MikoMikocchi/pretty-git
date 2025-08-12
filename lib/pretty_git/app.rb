@@ -5,6 +5,7 @@ require_relative 'analytics/summary'
 require_relative 'analytics/activity'
 require_relative 'analytics/files'
 require_relative 'analytics/authors'
+require_relative 'analytics/heatmap'
 require_relative 'render/json_renderer'
 require_relative 'render/console_renderer'
 
@@ -28,6 +29,8 @@ module PrettyGit
                  Analytics::Authors.call(enum, filters)
                when 'files'
                  Analytics::Files.call(enum, filters)
+               when 'heatmap'
+                 Analytics::Heatmap.call(enum, filters)
                else
                  raise ArgumentError, "Unknown report: #{report}"
                end
