@@ -77,6 +77,18 @@ module PrettyGit
       end
       # rubocop:enable Metrics/AbcSize
 
+      def render_heatmap(data)
+        title "Heatmap for #{data[:repo_path]}"
+        line "Period: #{data.dig(:period, :since)} .. #{data.dig(:period, :until)}"
+
+        @io.puts
+        title 'Heatmap'
+        table(%w[dow hour commits], data[:items])
+
+        @io.puts
+        line "Generated at: #{data[:generated_at]}"
+      end
+
       def title(text)
         if @color
           @io.puts "\e[1;36m#{text}\e[0m"
