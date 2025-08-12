@@ -2,6 +2,7 @@
 
 require_relative 'git/provider'
 require_relative 'analytics/summary'
+require_relative 'analytics/authors'
 require_relative 'render/json_renderer'
 require_relative 'render/console_renderer'
 
@@ -19,6 +20,8 @@ module PrettyGit
       result = case report
                when 'summary'
                  Analytics::Summary.call(enum, filters)
+               when 'authors'
+                 Analytics::Authors.call(enum, filters)
                else
                  raise ArgumentError, "Unknown report: #{report}"
                end

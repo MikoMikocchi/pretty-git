@@ -13,6 +13,8 @@ module PrettyGit
         case report
         when 'summary'
           render_summary(result)
+        when 'authors'
+          render_authors(result)
         else
           @io.puts result.inspect
         end
@@ -34,6 +36,22 @@ module PrettyGit
         @io.puts
         title 'Top Files'
         table(%w[path commits additions deletions changes], data[:top_files])
+
+        @io.puts
+        line "Generated at: #{data[:generated_at]}"
+      end
+      # rubocop:enable Metrics/AbcSize
+
+      # rubocop:disable Metrics/AbcSize
+      def render_authors(data)
+        title "Authors for #{data[:repo_path]}"
+        line "Period: #{data.dig(:period, :since)} .. #{data.dig(:period, :until)}"
+        t = data[:totals]
+        line "Totals: authors=#{t[:authors]} commits=#{t[:commits]} +#{t[:additions]} -#{t[:deletions]}"
+
+        @io.puts
+        title 'Authors'
+        table(%w[author author_email commits additions deletions avg_commit_size], data[:authors])
 
         @io.puts
         line "Generated at: #{data[:generated_at]}"
