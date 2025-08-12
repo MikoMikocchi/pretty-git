@@ -8,7 +8,7 @@ module PrettyGit
   # Helpers extracted from `PrettyGit::CLI` to keep the CLI class small
   # and RuboCop-compliant. Provides parser configuration and execution utilities.
   module CLIHelpers
-    REPORTS = %w[summary activity authors files heatmap].freeze
+    REPORTS = %w[summary activity authors files heatmap languages].freeze
     FORMATS = %w[console json csv md yaml xml].freeze
 
     module_function

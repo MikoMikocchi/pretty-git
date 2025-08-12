@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative 'terminal_width'
+require_relative 'languages_section'
+
 module PrettyGit
   module Render
     # Simple color helpers used by console components.
@@ -51,14 +54,14 @@ module PrettyGit
         @theme = theme
       end
 
-      def print(headers, rows, highlight_max: true)
+      def print(headers, rows, highlight_max: true, first_col_colorizer: nil)
         widths = compute_widths(headers, rows)
-        if (term_cols = detect_terminal_columns)
-          widths = fit_to_terminal(widths, term_cols)
+        if (term_cols = TerminalWidth.detect_terminal_columns(@io))
+          widths = TerminalWidth.fit_to_terminal(widths, term_cols)
         end
 
         print_header(headers, widths)
-        print_rows(headers, rows, widths, highlight_max)
+        print_rows(headers, rows, widths, highlight_max, first_col_colorizer)
         @io.puts 'No data' if rows.empty?
       end
 
@@ -85,29 +88,34 @@ module PrettyGit
       end
       # rubocop:enable Metrics/AbcSize
 
-      def print_rows(headers, rows, widths, highlight_max)
+      def print_rows(headers, rows, widths, highlight_max, first_col_colorizer)
         max_map = highlight_max ? compute_max_map(headers, rows) : {}
         eps = 1e-9
         rows.each do |row|
           cells = []
           headers.each_with_index do |h, i|
             val = row[h.to_sym]
+            color_code = i.zero? && first_col_colorizer ? first_col_colorizer.call(row) : nil
             cells << cell_for(
               val,
               widths[i],
               first_col: i.zero?,
-              is_max: max_cell?(val, i, max_map, highlight_max, eps)
+              is_max: max_cell?(val, i, max_map, highlight_max, eps),
+              color_code: color_code
             )
           end
           @io.puts cells.join(' ')
         end
       end
 
-      def cell_for(value, width, first_col:, is_max: false)
+      def cell_for(value, width, first_col:, is_max: false, color_code: nil)
         raw = value.to_s
         raw = truncate(raw, width) if first_col
         padded = first_col ? raw.ljust(width) : raw.rjust(width)
-        is_max ? Colors.bold(padded, @color) : padded
+        return Colors.bold(padded, @color) if is_max
+        return Colors.apply(color_code, padded, @color) if first_col && color_code
+
+        padded
       end
 
       def max_cell?(val, idx, max_map, highlight_max, eps)
@@ -119,33 +127,7 @@ module PrettyGit
 
       private
 
-      def detect_terminal_columns
-        return unless @io.respond_to?(:tty?) && @io.tty?
-
-        cols = io_columns || env_columns
-        cols if cols&.positive?
-      end
-
-      def io_columns
-        return unless @io.respond_to?(:winsize)
-
-        @io.winsize&.last
-      end
-
-      def env_columns
-        ENV['COLUMNS']&.to_i
-      end
-
-      def fit_to_terminal(widths, cols)
-        total = widths.sum + (widths.size - 1)
-        return widths if total <= cols
-
-        other = widths[1..].sum + (widths.size - 1)
-        min_first = 8
-        new_first = [cols - other, min_first].max
-        widths[0] = new_first
-        widths
-      end
+      # Terminal width helpers moved to PrettyGit::Render::TerminalWidth
 
       def truncate(text, max)
         return text if text.length <= max
@@ -191,6 +173,8 @@ module PrettyGit
           render_files(result)
         when 'heatmap'
           render_heatmap(result)
+        when 'languages'
+          LanguagesSection.render(@io, @table, result, color: @color)
         else
           @io.puts result.inspect
         end
@@ -279,6 +263,8 @@ module PrettyGit
         @io.puts
         line "Generated at: #{data[:generated_at]}"
       end
+
+      # Languages rendering moved to PrettyGit::Render::LanguagesSection
 
       def title(text)
         @io.puts Colors.title(text, @color, @theme)

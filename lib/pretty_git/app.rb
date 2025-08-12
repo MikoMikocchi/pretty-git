@@ -6,6 +6,7 @@ require_relative 'analytics/activity'
 require_relative 'analytics/files'
 require_relative 'analytics/authors'
 require_relative 'analytics/heatmap'
+require_relative 'analytics/languages'
 require_relative 'render/json_renderer'
 require_relative 'render/console_renderer'
 require_relative 'render/csv_renderer'
@@ -24,20 +25,7 @@ module PrettyGit
       provider = Git::Provider.new(filters)
       enum = provider.each_commit
 
-      result = case report
-               when 'summary'
-                 Analytics::Summary.call(enum, filters)
-               when 'activity'
-                 Analytics::Activity.call(enum, filters)
-               when 'authors'
-                 Analytics::Authors.call(enum, filters)
-               when 'files'
-                 Analytics::Files.call(enum, filters)
-               when 'heatmap'
-                 Analytics::Heatmap.call(enum, filters)
-               else
-                 raise ArgumentError, "Unknown report: #{report}"
-               end
+      result = analytics_for(report, enum, filters)
 
       render(report, result, filters, out)
       0
@@ -70,6 +58,25 @@ module PrettyGit
         Render::XmlRenderer.new(io: io)
       else
         Render::JsonRenderer.new(io: io)
+      end
+    end
+
+    def analytics_for(report, enum, filters)
+      case report
+      when 'summary'
+        Analytics::Summary.call(enum, filters)
+      when 'activity'
+        Analytics::Activity.call(enum, filters)
+      when 'authors'
+        Analytics::Authors.call(enum, filters)
+      when 'files'
+        Analytics::Files.call(enum, filters)
+      when 'heatmap'
+        Analytics::Heatmap.call(enum, filters)
+      when 'languages'
+        Analytics::Languages.call(enum, filters)
+      else
+        raise ArgumentError, "Unknown report: #{report}"
       end
     end
   end

@@ -20,6 +20,8 @@ module PrettyGit
           render_table('Top Files', %w[path commits additions deletions changes], result[:items])
         when 'heatmap'
           render_table('Heatmap', %w[dow hour commits], result[:items])
+        when 'languages'
+          render_table('Languages', %w[language bytes percent], result[:items])
         else
           @io.puts result.inspect
         end
