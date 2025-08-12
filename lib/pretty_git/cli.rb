@@ -6,10 +6,12 @@ require_relative 'filters'
 require_relative 'app'
 
 module PrettyGit
+  # Command-line interface entry point.
   class CLI
     SUPPORTED_REPORTS = %w[summary activity authors files heatmap].freeze
     SUPPORTED_FORMATS = %w[console json csv md yaml xml].freeze
 
+    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     def self.run(argv = ARGV, out: $stdout, err: $stderr)
       options = {
         report: 'summary',
@@ -42,14 +44,18 @@ module PrettyGit
         opts.on('--format FMT', SUPPORTED_FORMATS, 'console|json|csv|md|yaml|xml') { |v| options[:format] = v }
         opts.on('--out FILE', 'Output file path') { |v| options[:out] = v }
         opts.on('--no-color', 'Disable colors in console output') { options[:no_color] = true }
-        opts.on('--version', 'Show version') { out.puts PrettyGit::VERSION; return 0 }
-        opts.on('--help', 'Show help') { out.puts opts; return 0 }
+        opts.on('--version', 'Show version') do
+          out.puts PrettyGit::VERSION
+          return 0
+        end
+        opts.on('--help', 'Show help') do
+          out.puts opts
+          return 0
+        end
       end
 
       # REPORT positional arg
-      if argv[0] && argv[0] !~ /^-/
-        options[:report] = argv.shift
-      end
+      options[:report] = argv.shift if argv[0] && argv[0] !~ /^-/
 
       begin
         parser.parse!(argv)
@@ -80,7 +86,13 @@ module PrettyGit
         no_color: options[:no_color]
       )
 
-      App.new.run(options[:report], filters, out: out, err: err)
+      if options[:out]
+        File.open(options[:out], 'w') do |f|
+          return App.new.run(options[:report], filters, out: f, err: err)
+        end
+      else
+        App.new.run(options[:report], filters, out: out, err: err)
+      end
     rescue ArgumentError => e
       err.puts e.message
       1
@@ -88,5 +100,6 @@ module PrettyGit
       err.puts e.message
       2
     end
+    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
   end
 end

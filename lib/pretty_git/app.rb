@@ -6,8 +6,11 @@ require_relative 'render/json_renderer'
 require_relative 'render/console_renderer'
 
 module PrettyGit
+  # Orchestrates running a report using provider, analytics and renderer.
   class App
     def run(report, filters, out: $stdout, err: $stderr)
+      _err = err # unused for now, kept for future extensibility
+
       ensure_repo!(filters.repo_path)
 
       provider = Git::Provider.new(filters)
@@ -28,17 +31,15 @@ module PrettyGit
 
     def ensure_repo!(path)
       return if File.directory?(File.join(path, '.git'))
+
       raise ArgumentError, "Not a git repository: #{path}"
     end
 
     def render(report, result, filters, io)
       case filters.format
-      when 'json'
-        Render::JsonRenderer.new(io: io).call(report, result, filters)
       when 'console'
         Render::ConsoleRenderer.new(io: io, color: !filters.no_color).call(report, result, filters)
       else
-        # На первом инкременте поддержим json и console. Остальные добавим позже.
         Render::JsonRenderer.new(io: io).call(report, result, filters)
       end
     end

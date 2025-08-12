@@ -2,8 +2,11 @@
 
 module PrettyGit
   module Analytics
+    # Summary analytics for repository activity.
+    # Aggregates totals, top authors, and top files based on streamed commits.
     class Summary
       class << self
+        # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
         def call(enum, filters)
           totals = { commits: 0, authors: 0, additions: 0, deletions: 0 }
           per_author = Hash.new { |h, k| h[k] = { commits: 0, additions: 0, deletions: 0, email: nil } }
@@ -66,12 +69,14 @@ module PrettyGit
             generated_at: Time.now.utc.iso8601
           }
         end
+        # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
 
         private
 
         def normalize_limit(raw)
           return nil if raw.nil?
           return nil if raw == 'all'
+
           n = raw.to_i
           n <= 0 ? nil : n
         end

@@ -2,6 +2,7 @@
 
 module PrettyGit
   module Render
+    # Renders human-friendly console output with optional colors.
     class ConsoleRenderer
       def initialize(io: $stdout, color: true)
         @io = io
@@ -19,23 +20,25 @@ module PrettyGit
 
       private
 
-      def render_summary(h)
-        title "Summary for #{h[:repo_path]}"
-        line "Period: #{h.dig(:period, :since)} .. #{h.dig(:period, :until)}"
-        t = h[:totals]
+      # rubocop:disable Metrics/AbcSize
+      def render_summary(data)
+        title "Summary for #{data[:repo_path]}"
+        line "Period: #{data.dig(:period, :since)} .. #{data.dig(:period, :until)}"
+        t = data[:totals]
         line "Totals: commits=#{t[:commits]} authors=#{t[:authors]} +#{t[:additions]} -#{t[:deletions]}"
 
         @io.puts
         title 'Top Authors'
-        table(%w[author commits additions deletions avg_commit_size], h[:top_authors])
+        table(%w[author commits additions deletions avg_commit_size], data[:top_authors])
 
         @io.puts
         title 'Top Files'
-        table(%w[path commits additions deletions changes], h[:top_files])
+        table(%w[path commits additions deletions changes], data[:top_files])
 
         @io.puts
-        line "Generated at: #{h[:generated_at]}"
+        line "Generated at: #{data[:generated_at]}"
       end
+      # rubocop:enable Metrics/AbcSize
 
       def title(text)
         if @color
@@ -49,6 +52,7 @@ module PrettyGit
         @io.puts text
       end
 
+      # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def table(headers, rows)
         widths = headers.map(&:length)
         rows.each do |r|
@@ -64,6 +68,7 @@ module PrettyGit
         end
         @io.puts 'No data' if rows.empty?
       end
+      # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     end
   end
 end

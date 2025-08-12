@@ -31,6 +31,7 @@ module PrettyGit
 
     def time_to_iso8601(val)
       return nil if val.nil? || val.to_s.strip.empty?
+
       t = val.is_a?(Time) ? val : Time.parse(val.to_s)
       t = t.getlocal if t.utc_offset.nil?
       t.utc.iso8601
