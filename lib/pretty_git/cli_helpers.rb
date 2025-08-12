@@ -45,6 +45,7 @@ module PrettyGit
       opts.on('--format FMT', 'console|json|csv|md|yaml|xml') { |val| options[:format] = val }
       opts.on('--out FILE', 'Output file path') { |val| options[:out] = val }
       opts.on('--no-color', 'Disable colors in console output') { options[:no_color] = true }
+      opts.on('--theme NAME', 'console color theme: basic|bright|mono') { |val| options[:theme] = val }
     end
 
     def add_misc_options(opts, options)
@@ -62,20 +63,39 @@ module PrettyGit
     end
 
     def validate_and_maybe_exit(options, parser, out, err)
+      code = handle_version_help(options, parser, out)
+      return code unless code.nil?
+
+      return nil if valid_report?(options[:report]) && valid_theme?(options[:theme])
+
+      print_validation_errors(options, err)
+      1
+    end
+
+    def handle_version_help(options, parser, out)
       if options[:_version]
         out.puts PrettyGit::VERSION
         return 0
       end
-
       if options[:_help]
         out.puts parser
         return 0
       end
+      nil
+    end
 
-      return nil if REPORTS.include?(options[:report])
+    def valid_report?(report) = REPORTS.include?(report)
+    def valid_theme?(theme) = %w[basic bright mono].include?(theme)
 
-      err.puts "Unknown report: #{options[:report]}. Supported: #{REPORTS.join(', ')}"
-      1
+    def print_validation_errors(options, err)
+      supported = REPORTS.join(', ')
+      unless valid_report?(options[:report])
+        err.puts "Unknown report: #{options[:report]}."
+        err.puts "Supported: #{supported}"
+      end
+      return if valid_theme?(options[:theme])
+
+      err.puts "Unknown theme: #{options[:theme]}. Supported: basic, bright, mono"
     end
 
     def build_filters(options)
@@ -92,7 +112,8 @@ module PrettyGit
         limit: options[:limit],
         format: options[:format],
         out: options[:out],
-        no_color: options[:no_color]
+        no_color: options[:no_color],
+        theme: options[:theme]
       )
     end
 

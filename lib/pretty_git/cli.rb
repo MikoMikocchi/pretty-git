@@ -27,6 +27,7 @@ module PrettyGit
         format: 'console',
         out: nil,
         no_color: false,
+        theme: 'basic',
         _version: false,
         _help: false
       }

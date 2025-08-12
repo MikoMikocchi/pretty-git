@@ -52,19 +52,24 @@ module PrettyGit
     end
 
     def render(report, result, filters, io)
+      renderer_for(filters, io).call(report, result, filters)
+    end
+
+    def renderer_for(filters, io)
       case filters.format
       when 'console'
-        Render::ConsoleRenderer.new(io: io, color: !filters.no_color).call(report, result, filters)
+        use_color = !filters.no_color && filters.theme != 'mono'
+        Render::ConsoleRenderer.new(io: io, color: use_color, theme: filters.theme)
       when 'csv'
-        Render::CsvRenderer.new(io: io).call(report, result, filters)
+        Render::CsvRenderer.new(io: io)
       when 'md'
-        Render::MarkdownRenderer.new(io: io).call(report, result, filters)
+        Render::MarkdownRenderer.new(io: io)
       when 'yaml'
-        Render::YamlRenderer.new(io: io).call(report, result, filters)
+        Render::YamlRenderer.new(io: io)
       when 'xml'
-        Render::XmlRenderer.new(io: io).call(report, result, filters)
+        Render::XmlRenderer.new(io: io)
       else
-        Render::JsonRenderer.new(io: io).call(report, result, filters)
+        Render::JsonRenderer.new(io: io)
       end
     end
   end

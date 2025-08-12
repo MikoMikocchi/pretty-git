@@ -2,11 +2,181 @@
 
 module PrettyGit
   module Render
-    # Renders human-friendly console output with optional colors.
-    class ConsoleRenderer
-      def initialize(io: $stdout, color: true)
+    # Simple color helpers used by console components.
+    module Colors
+      module_function
+
+      def apply(code, text, enabled)
+        return text unless enabled
+
+        "\e[#{code}m#{text}\e[0m"
+      end
+
+      def title(text, enabled, theme = 'basic')
+        code = theme == 'bright' ? '1;35' : '1;36'
+        apply(code, text, enabled)
+      end
+
+      def header(text, enabled, theme = 'basic')
+        code = theme == 'bright' ? '1;36' : '1;34'
+        apply(code, text, enabled)
+      end
+
+      def dim(text, enabled)
+        apply('2;37', text, enabled)
+      end
+
+      def green(text, enabled)
+        apply('32', text, enabled)
+      end
+
+      def red(text, enabled)
+        apply('31', text, enabled)
+      end
+
+      def yellow(text, enabled)
+        apply('33', text, enabled)
+      end
+
+      def bold(text, enabled)
+        apply('1', text, enabled)
+      end
+    end
+
+    # Prints aligned ASCII tables with optional colored headers.
+    class TablePrinter
+      def initialize(io, color: true, theme: 'basic')
         @io = io
         @color = color
+        @theme = theme
+      end
+
+      def print(headers, rows, highlight_max: true)
+        widths = compute_widths(headers, rows)
+        if (term_cols = detect_terminal_columns)
+          widths = fit_to_terminal(widths, term_cols)
+        end
+
+        print_header(headers, widths)
+        print_rows(headers, rows, widths, highlight_max)
+        @io.puts 'No data' if rows.empty?
+      end
+
+      def compute_widths(headers, rows)
+        widths = headers.map(&:length)
+        rows.each do |row|
+          widths = widths.each_with_index.map do |w, i|
+            [w, row[headers[i].to_sym].to_s.length].max
+          end
+        end
+        widths
+      end
+
+      # rubocop:disable Metrics/AbcSize
+      def print_header(headers, widths)
+        header_line = headers.map.with_index do |h, i|
+          text = i.zero? ? truncate(h, widths[i]) : h
+          i.zero? ? text.ljust(widths[i]) : text.rjust(widths[i])
+        end.join(' ')
+        sep_line = widths.map { |w| '-' * w }.join(' ')
+
+        @io.puts Colors.header(header_line, @color, @theme)
+        @io.puts Colors.dim(sep_line, @color)
+      end
+      # rubocop:enable Metrics/AbcSize
+
+      def print_rows(headers, rows, widths, highlight_max)
+        max_map = highlight_max ? compute_max_map(headers, rows) : {}
+        eps = 1e-9
+        rows.each do |row|
+          cells = []
+          headers.each_with_index do |h, i|
+            val = row[h.to_sym]
+            cells << cell_for(
+              val,
+              widths[i],
+              first_col: i.zero?,
+              is_max: max_cell?(val, i, max_map, highlight_max, eps)
+            )
+          end
+          @io.puts cells.join(' ')
+        end
+      end
+
+      def cell_for(value, width, first_col:, is_max: false)
+        raw = value.to_s
+        raw = truncate(raw, width) if first_col
+        padded = first_col ? raw.ljust(width) : raw.rjust(width)
+        is_max ? Colors.bold(padded, @color) : padded
+      end
+
+      def max_cell?(val, idx, max_map, highlight_max, eps)
+        return false unless highlight_max && max_map[idx]
+        return false unless numeric?(val)
+
+        (val.to_f - max_map[idx]).abs < eps
+      end
+
+      private
+
+      def detect_terminal_columns
+        return unless @io.respond_to?(:tty?) && @io.tty?
+
+        cols = io_columns || env_columns
+        cols if cols&.positive?
+      end
+
+      def io_columns
+        return unless @io.respond_to?(:winsize)
+
+        @io.winsize&.last
+      end
+
+      def env_columns
+        ENV['COLUMNS']&.to_i
+      end
+
+      def fit_to_terminal(widths, cols)
+        total = widths.sum + (widths.size - 1)
+        return widths if total <= cols
+
+        other = widths[1..].sum + (widths.size - 1)
+        min_first = 8
+        new_first = [cols - other, min_first].max
+        widths[0] = new_first
+        widths
+      end
+
+      def truncate(text, max)
+        return text if text.length <= max
+        return text[0, max] if max <= 1
+
+        "#{text[0, max - 1]}…"
+      end
+
+      def numeric?(val)
+        val.is_a?(Numeric) || val.to_s.match?(/\A-?\d+(\.\d+)?\z/)
+      end
+
+      def compute_max_map(headers, rows)
+        map = {}
+        headers.each_with_index do |_h, i|
+          next if i.zero?
+
+          nums = rows.map { |r| r[headers[i].to_sym] }.select { |v| numeric?(v) }.map(&:to_f)
+          map[i] = nums.max if nums.any?
+        end
+        map
+      end
+    end
+
+    # Renders human-friendly console output with optional colors.
+    class ConsoleRenderer
+      def initialize(io: $stdout, color: true, theme: 'basic')
+        @io = io
+        @color = color
+        @theme = theme
+        @table = TablePrinter.new(@io, color: @color, theme: @theme)
       end
 
       def call(report, result, _filters)
@@ -31,17 +201,22 @@ module PrettyGit
       # rubocop:disable Metrics/AbcSize
       def render_summary(data)
         title "Summary for #{data[:repo_path]}"
-        line "Period: #{data.dig(:period, :since)} .. #{data.dig(:period, :until)}"
+        period = "Period: #{data.dig(:period, :since)} .. #{data.dig(:period, :until)}"
+        line period
         t = data[:totals]
-        line "Totals: commits=#{t[:commits]} authors=#{t[:authors]} +#{t[:additions]} -#{t[:deletions]}"
+        commits_s = "commits=#{Colors.yellow(t[:commits], @color)}"
+        authors_s = "authors=#{t[:authors]}"
+        adds_s = "+#{Colors.green(t[:additions], @color)}"
+        dels_s = "-#{Colors.red(t[:deletions], @color)}"
+        line "Totals: #{commits_s} #{authors_s} #{adds_s} #{dels_s}"
 
         @io.puts
         title 'Top Authors'
-        table(%w[author commits additions deletions avg_commit_size], data[:top_authors])
+        @table.print(%w[author commits additions deletions avg_commit_size], data[:top_authors])
 
         @io.puts
         title 'Top Files'
-        table(%w[path commits additions deletions changes], data[:top_files])
+        @table.print(%w[path commits additions deletions changes], data[:top_files])
 
         @io.puts
         line "Generated at: #{data[:generated_at]}"
@@ -55,7 +230,7 @@ module PrettyGit
 
         @io.puts
         title 'Activity'
-        table(%w[bucket timestamp commits additions deletions], data[:items])
+        @table.print(%w[bucket timestamp commits additions deletions], data[:items])
 
         @io.puts
         line "Generated at: #{data[:generated_at]}"
@@ -66,16 +241,32 @@ module PrettyGit
         title "Authors for #{data[:repo_path]}"
         line "Period: #{data.dig(:period, :since)} .. #{data.dig(:period, :until)}"
         t = data[:totals]
-        line "Totals: authors=#{t[:authors]} commits=#{t[:commits]} +#{t[:additions]} -#{t[:deletions]}"
+        commits_s = "commits=#{Colors.yellow(t[:commits], @color)}"
+        authors_s = "authors=#{t[:authors]}"
+        adds_s = "+#{Colors.green(t[:additions], @color)}"
+        dels_s = "-#{Colors.red(t[:deletions], @color)}"
+        line "Totals: #{authors_s} #{commits_s} #{adds_s} #{dels_s}"
 
         @io.puts
         title 'Authors'
-        table(%w[author author_email commits additions deletions avg_commit_size], data[:items])
+        @table.print(%w[author author_email commits additions deletions avg_commit_size], data[:items])
 
         @io.puts
         line "Generated at: #{data[:generated_at]}"
       end
       # rubocop:enable Metrics/AbcSize
+
+      def render_files(data)
+        title "Files for #{data[:repo_path]}"
+        line "Period: #{data.dig(:period, :since)} .. #{data.dig(:period, :until)}"
+
+        @io.puts
+        title 'Files'
+        @table.print(%w[path commits additions deletions changes], data[:items])
+
+        @io.puts
+        line "Generated at: #{data[:generated_at]}"
+      end
 
       def render_heatmap(data)
         title "Heatmap for #{data[:repo_path]}"
@@ -83,41 +274,21 @@ module PrettyGit
 
         @io.puts
         title 'Heatmap'
-        table(%w[dow hour commits], data[:items])
+        @table.print(%w[dow hour commits], data[:items])
 
         @io.puts
         line "Generated at: #{data[:generated_at]}"
       end
 
       def title(text)
-        if @color
-          @io.puts "\e[1;36m#{text}\e[0m"
-        else
-          @io.puts text
-        end
+        @io.puts Colors.title(text, @color, @theme)
       end
 
       def line(text)
         @io.puts text
       end
 
-      # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-      def table(headers, rows)
-        widths = headers.map(&:length)
-        rows.each do |r|
-          widths = widths.each_with_index.map { |w, i| [w, r[headers[i].to_sym].to_s.length].max }
-        end
-
-        fmt = widths.map.with_index { |w, i| i.zero? ? "%-#{w}s" : " %#{w}s" }.join
-        @io.puts headers.map.with_index { |h, i| (i.zero? ? h.ljust(widths[i]) : h.rjust(widths[i])) }.join(' ')
-        @io.puts widths.map { |w| '-' * w }.join(' ')
-        rows.each do |r|
-          vals = headers.map { |h| r[h.to_sym] }
-          @io.puts format(fmt, *vals)
-        end
-        @io.puts 'No data' if rows.empty?
-      end
-      # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+      # table is handled by @table
     end
   end
 end

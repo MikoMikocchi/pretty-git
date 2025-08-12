@@ -17,6 +17,7 @@ module PrettyGit
     :format,
     :out,
     :no_color,
+    :theme,
     keyword_init: true
   ) do
     def since_iso8601
