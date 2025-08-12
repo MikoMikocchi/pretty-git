@@ -4,11 +4,11 @@ require 'time'
 
 module PrettyGit
   module Analytics
-    # Строит отчёт по авторам: commits, additions, deletions, avg_commit_size
+    # Builds authors report: commits, additions, deletions, avg_commit_size
     class Authors
       class << self
-        # Выполняет расчёт на основе перечислителя коммитов
-        # Возвращает Hash, сериализуемый в JSON/YAML и используемый рендерами
+        # Computes aggregates from a commits enumerator
+        # Returns a Hash suitable for JSON/YAML serialization and renderers
         # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
         def call(commits_enum, filters)
           authors = Hash.new { |h, k| h[k] = base_author(k) }
@@ -40,7 +40,7 @@ module PrettyGit
               additions: rows.sum { |r| r[:additions] },
               deletions: rows.sum { |r| r[:deletions] }
             },
-            authors: rows,
+            items: rows,
             generated_at: Time.now.utc.iso8601
           }
         end

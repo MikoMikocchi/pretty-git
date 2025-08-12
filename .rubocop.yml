@@ -30,3 +30,31 @@ RSpec:
   Language:
     Expectations:
       - expect
+
+# ---------------------------
+# Spec-specific relaxations
+# ---------------------------
+RSpec/SpecFilePathFormat:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Max: 30
+
+RSpec/MultipleExpectations:
+  Max: 10
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'spec/**/*'
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'spec/**/*'
+
+Layout/FirstArrayElementIndentation:
+  Exclude:
+    - 'spec/**/*'
+
+Lint/RedundantCopDisableDirective:
+  Exclude:
+    - 'spec/**/*'

@@ -51,7 +51,7 @@ module PrettyGit
 
         @io.puts
         title 'Authors'
-        table(%w[author author_email commits additions deletions avg_commit_size], data[:authors])
+        table(%w[author author_email commits additions deletions avg_commit_size], data[:items])
 
         @io.puts
         line "Generated at: #{data[:generated_at]}"
