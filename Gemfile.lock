@@ -3,6 +3,7 @@ PATH
   specs:
     pretty-git (0.1.0)
       csv
+      rexml
 
 GEM
   remote: https://rubygems.org/
@@ -22,6 +23,7 @@ GEM
     rainbow (3.1.1)
     rake (13.3.0)
     regexp_parser (2.11.1)
+    rexml (3.4.0)
     rspec (3.13.1)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)

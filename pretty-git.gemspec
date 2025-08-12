@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 3.4'
 
-  # Ruby 3.4+ no longer ships csv as a default gem; depend on the csv gem explicitly
+  # Ruby 3.4+ no longer ships csv/rexml as default gems; depend explicitly
   spec.add_dependency 'csv'
+  spec.add_dependency 'rexml'
 end
