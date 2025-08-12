@@ -9,6 +9,7 @@ require_relative 'analytics/heatmap'
 require_relative 'render/json_renderer'
 require_relative 'render/console_renderer'
 require_relative 'render/csv_renderer'
+require_relative 'render/markdown_renderer'
 
 module PrettyGit
   # Orchestrates running a report using provider, analytics and renderer.
@@ -54,6 +55,8 @@ module PrettyGit
         Render::ConsoleRenderer.new(io: io, color: !filters.no_color).call(report, result, filters)
       when 'csv'
         Render::CsvRenderer.new(io: io).call(report, result, filters)
+      when 'md'
+        Render::MarkdownRenderer.new(io: io).call(report, result, filters)
       else
         Render::JsonRenderer.new(io: io).call(report, result, filters)
       end
