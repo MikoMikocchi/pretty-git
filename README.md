@@ -1,5 +1,9 @@
 # Pretty Git
 
+[![CI](https://github.com/MikoMikocchi/pretty-git/actions/workflows/ci.yml/badge.svg)](https://github.com/MikoMikocchi/pretty-git/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Ruby 3.4+](https://img.shields.io/badge/ruby-3.4%2B-red)
+
 <p align="right">
   <b>English</b> | <a href="./README.ru.md">Русский</a>
 </p>
@@ -231,6 +235,8 @@ JavaScript   78901    38.3
 Markdown      1200     1.7
 ```
 
+![Console output — languages](docs/images/PrettyGitConsoleLanguages.png)
+
 Notes:
 - **Detection**: by file extensions and certain filenames (`Makefile`, `Dockerfile`).
 - **Exclusions**: binary files and "vendor"-like directories are ignored. By default `vendor/`, `node_modules/`, `.git/`, build artifacts and caches are skipped. For Python projects additional directories are skipped: `.venv/`, `venv/`, `env/`, `__pycache__/`, `.mypy_cache/`, `.pytest_cache/`, `.tox/`, `.eggs/`, `.ruff_cache/`, `.ipynb_checkpoints/`.
@@ -238,6 +244,8 @@ Notes:
 - **Path filters**: use `--path/--exclude-path` (glob patterns supported) to focus on relevant areas.
 - **Limit**: `--limit N` restricts number of rows; `0`/`all` — no limit.
 - **Console colors**: language names use approximate GitHub colors; `--no-color` disables, `--theme mono` makes output monochrome.
+
+See also: [Ignored directories and files](#ignored-directories-and-files).
 
 Export:
 - CSV/MD: columns — `language,bytes,percent`.
@@ -340,6 +348,31 @@ _Example terminal output (theme: basic)._
     <repo_path>/abs/path</repo_path>
   </authors>
   ```
+
+## Ignored directories and files
+
+To keep language statistics meaningful, certain directories and file types are skipped by default.
+
+**Directories ignored** (any path segment matching one of these):
+
+```
+vendor, node_modules, .git, .bundle, dist, build, out, target, coverage,
+.venv, venv, env, __pycache__, .mypy_cache, .pytest_cache, .tox, .eggs, .ruff_cache,
+.ipynb_checkpoints
+```
+
+**Binary/data extensions ignored**:
+
+```
+.png, .jpg, .jpeg, .gif, .svg, .webp, .ico, .bmp,
+.pdf, .zip, .tar, .gz, .tgz, .bz2, .7z, .rar,
+.mp3, .ogg, .wav, .mp4, .mov, .avi, .mkv,
+.woff, .woff2, .ttf, .otf, .eot,
+.jar, .class, .dll, .so, .dylib,
+.exe, .bin, .dat
+```
+
+These lists mirror the implementation in `lib/pretty_git/analytics/languages.rb` and may evolve.
 
 ## Determinism and Sorting
 Output is deterministic given the same input. Sorting for files/authors: by changes (desc), then by commits (desc), then by path/name (asc). Limits are applied after sorting; `all` or `0` means no limit.

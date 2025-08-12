@@ -1,5 +1,9 @@
 # Pretty Git
 
+[![CI](https://github.com/MikoMikocchi/pretty-git/actions/workflows/ci.yml/badge.svg)](https://github.com/MikoMikocchi/pretty-git/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Ruby 3.4+](https://img.shields.io/badge/ruby-3.4%2B-red)
+
 <p align="right">
   <a href="./README.md">English</a> | <b>Русский</b>
 </p>
@@ -231,6 +235,8 @@ JavaScript   78901    38.3
 Markdown      1200     1.7
 ```
 
+![Console output — languages](docs/images/PrettyGitConsoleLanguages.png)
+
 Замечания:
 - __Определение языка__: по расширениям файлов и некоторым именам файлов (`Makefile`, `Dockerfile`).
 - __Исключения__: бинарные файлы и "vendor"‑директории игнорируются. По умолчанию пропускаются `vendor/`, `node_modules/`, `.git/`, артефакты сборки и кэши. Для Python дополнительно исключаются `.venv/`, `venv/`, `env/`, `__pycache__/`, `.mypy_cache/`, `.pytest_cache/`, `.tox/`, `.eggs/`, `.ruff_cache/`, `.ipynb_checkpoints/`.
@@ -242,6 +248,31 @@ Markdown      1200     1.7
 Экспорт:
 - CSV/MD: колонки — `language,bytes,percent`.
 - JSON/YAML/XML: полная структура отчёта, включая метаданные (`report`, `generated_at`, `repo_path`).
+
+## Игнорируемые директории и файлы
+
+Чтобы статистика по языкам оставалась релевантной, некоторые директории и типы файлов пропускаются по умолчанию.
+
+**Игнорируемые директории** (если сегмент пути совпадает):
+
+```
+vendor, node_modules, .git, .bundle, dist, build, out, target, coverage,
+.venv, venv, env, __pycache__, .mypy_cache, .pytest_cache, .tox, .eggs, .ruff_cache,
+.ipynb_checkpoints
+```
+
+**Игнорируемые бинарные/данные расширения**:
+
+```
+.png, .jpg, .jpeg, .gif, .svg, .webp, .ico, .bmp,
+.pdf, .zip, .tar, .gz, .tgz, .bz2, .7z, .rar,
+.mp3, .ogg, .wav, .mp4, .mov, .avi, .mkv,
+.woff, .woff2, .ttf, .otf, .eot,
+.jar, .class, .dll, .so, .dylib,
+.exe, .bin, .dat
+```
+
+Списки соответствуют реализации в `lib/pretty_git/analytics/languages.rb` и могут изменяться.
 
 ## Экспорт в форматы
 
