@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-require "rake"
+require 'rake'
 
-desc "Run rubocop"
+desc 'Run rubocop'
 task :rubocop do
-  sh "bundle exec rubocop"
+  sh 'bundle exec rubocop'
 end
 
-desc "Run specs"
+desc 'Run specs'
 task :spec do
-  sh "bundle exec rspec"
+  sh 'bundle exec rspec'
 end
 
-task default: [:rubocop, :spec]
+task default: %i[rubocop spec]

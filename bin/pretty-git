@@ -1,30 +1,29 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-#
+require 'optparse'
+require_relative '../lib/pretty_git'
 
 options = {
-  report: "summary",
+  report: 'summary'
 }
 
 parser = OptionParser.new do |opts|
-  opts.banner = "Usage: pretty-git [REPORT] [options]"
+  opts.banner = 'Usage: pretty-git [REPORT] [options]'
 
-  opts.on("--version", "Show version") do
+  opts.on('--version', 'Show version') do
     puts PrettyGit::VERSION
     exit 0
   end
 
-  opts.on("--help", "Show help") do
+  opts.on('--help', 'Show help') do
     puts opts
     exit 0
   end
 end
 
 # Extract REPORT if first arg is not an option
-if ARGV[0] && ARGV[0] !~ /^-/
-  options[:report] = ARGV.shift
-end
+options[:report] = ARGV.shift if ARGV[0] && ARGV[0] !~ /^-/
 
 begin
   parser.parse!(ARGV)

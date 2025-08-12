@@ -7,6 +7,14 @@ AllCops:
     - 'bin/binstubs/**/*'
     - 'pkg/**/*'
     - 'tmp/**/*'
+    - 'bin/rake'
+    - 'bin/rspec'
+    - 'bin/rubocop'
+    - 'bin/htmldiff'
+    - 'bin/ldiff'
+    - 'bin/racc'
+    - 'bin/ruby-parse'
+    - 'bin/ruby-rewrite'
   SuggestExtensions: false
 
 plugins:
