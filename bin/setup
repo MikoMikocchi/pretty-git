@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v git >/dev/null 2>&1; then
+  echo "git is required but not found in PATH" >&2
+  exit 1
+fi
+
+if ! command -v bundler >/dev/null 2>&1; then
+  echo "Installing bundler..."
+  gem install bundler
+fi
+
+bundle install
+
+echo "Setup complete."

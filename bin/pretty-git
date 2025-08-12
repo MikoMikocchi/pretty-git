@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+#
+
+options = {
+  report: "summary",
+}
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: pretty-git [REPORT] [options]"
+
+  opts.on("--version", "Show version") do
+    puts PrettyGit::VERSION
+    exit 0
+  end
+
+  opts.on("--help", "Show help") do
+    puts opts
+    exit 0
+  end
+end
+
+# Extract REPORT if first arg is not an option
+if ARGV[0] && ARGV[0] !~ /^-/
+  options[:report] = ARGV.shift
+end
+
+begin
+  parser.parse!(ARGV)
+rescue OptionParser::InvalidOption => e
+  warn e.message
+  warn parser
+  exit 1
+end
+
+# Placeholder until implementation per specs
+puts "pretty-git: report=#{options[:report]} (implementation pending)"

@@ -1,0 +1,24 @@
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.4
+  Exclude:
+    - 'specs/**/*'
+    - 'vendor/**/*'
+    - 'bin/binstubs/**/*'
+    - 'pkg/**/*'
+    - 'tmp/**/*'
+  SuggestExtensions: false
+
+plugins:
+  - rubocop-rspec
+
+Layout/LineLength:
+  Max: 120
+
+Metrics/MethodLength:
+  Max: 20
+
+RSpec:
+  Language:
+    Expectations:
+      - expect
