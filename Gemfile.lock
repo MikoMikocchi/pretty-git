@@ -2,11 +2,13 @@ PATH
   remote: .
   specs:
     pretty-git (0.1.0)
+      csv
 
 GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.3)
+    csv (3.3.5)
     diff-lcs (1.6.2)
     json (2.13.2)
     language_server-protocol (3.17.0.5)

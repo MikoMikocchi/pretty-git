@@ -26,4 +26,7 @@ Gem::Specification.new do |spec|
   spec.metadata['rubygems_mfa_required'] = 'true'
 
   spec.required_ruby_version = '>= 3.4'
+
+  # Ruby 3.4+ no longer ships csv as a default gem; depend on the csv gem explicitly
+  spec.add_dependency 'csv'
 end
