@@ -13,8 +13,12 @@ module PrettyGit
         case report
         when 'summary'
           render_summary(result)
+        when 'activity'
+          render_activity(result)
         when 'authors'
           render_authors(result)
+        when 'files'
+          render_files(result)
         else
           @io.puts result.inspect
         end
@@ -41,6 +45,19 @@ module PrettyGit
         line "Generated at: #{data[:generated_at]}"
       end
       # rubocop:enable Metrics/AbcSize
+
+      def render_activity(data)
+        title "Activity for #{data[:repo_path]}"
+        line "Period: #{data.dig(:period, :since)} .. #{data.dig(:period, :until)}"
+        line "Bucket: #{data[:bucket]}"
+
+        @io.puts
+        title 'Activity'
+        table(%w[bucket timestamp commits additions deletions], data[:items])
+
+        @io.puts
+        line "Generated at: #{data[:generated_at]}"
+      end
 
       # rubocop:disable Metrics/AbcSize
       def render_authors(data)
