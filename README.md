@@ -61,19 +61,19 @@ Generator of rich reports for a local Git repository: summary, activity, authors
 
 ## Installation
 
-### Homebrew (recommended)
+### 🍺 Homebrew (recommended)
 ```bash
 brew tap MikoMikocchi/tap
 brew install pretty-git
 ```
 
-### RubyGems
+### ♦️ RubyGems
 ```bash
 gem install pretty-git
 ```
 Choose one:
 
-1) From source (recommended for development)
+1) 🛠️ From source (recommended for development)
 
 ```bash
 git clone <repo_url>
@@ -83,14 +83,14 @@ bin/setup
 bundle exec bin/pretty-git --help
 ```
 
-2) As a gem (after the first release)
+2) ♦️ As a gem (after the first release)
 
 ```bash
 gem install pretty-git
 pretty-git --version
 ```
 
-3) Via Bundler
+3) 📦 Via Bundler
 
 ```ruby
 # Gemfile
