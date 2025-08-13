@@ -21,7 +21,7 @@ module PrettyGit
         when 'heatmap'
           render_table('Heatmap', %w[dow hour commits], result[:items])
         when 'languages'
-          render_table('Languages', %w[language bytes percent], result[:items])
+          render_table('Languages', %w[language bytes percent color], result[:items])
         else
           @io.puts result.inspect
         end

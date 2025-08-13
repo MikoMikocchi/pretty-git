@@ -21,7 +21,7 @@ module PrettyGit
         when 'heatmap'
           write_csv(%w[dow hour commits], result[:items])
         when 'languages'
-          write_csv(%w[language bytes percent], result[:items])
+          write_csv(%w[language bytes percent color], result[:items])
         else
           raise ArgumentError, "CSV output for report '#{report}' is not supported yet"
         end

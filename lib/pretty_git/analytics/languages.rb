@@ -43,6 +43,24 @@ module PrettyGit
       'Dockerfile' => 'Dockerfile'
     }.freeze
 
+    # Language → HEX color (without leading #) for exports (CSV/JSON/YAML/XML)
+    LANG_HEX_COLORS = {
+      'Ruby' => 'cc342d',
+      'JavaScript' => 'f1e05a', 'TypeScript' => '3178c6',
+      'JSX' => 'f1e05a', 'TSX' => '3178c6',
+      'Python' => '3572a5', 'Go' => '00add8', 'Rust' => 'dea584', 'Java' => 'b07219',
+      'C' => '555555', 'C++' => 'f34b7d', 'C#' => '178600', 'Objective-C' => '438eff', 'Swift' => 'ffac45',
+      'Kotlin' => 'a97bff', 'Scala' => 'c22d40', 'Groovy' => 'e69f56', 'Dart' => '00b4ab',
+      'PHP' => '4f5d95', 'Perl' => '0298c3', 'R' => '198ce7', 'Lua' => '000080', 'Haskell' => '5e5086',
+      'Elixir' => '6e4a7e', 'Erlang' => 'b83998',
+      'Shell' => '89e051', 'PowerShell' => '012456', 'Batchfile' => 'c1f12e',
+      'HTML' => 'e34c26', 'CSS' => '563d7c', 'SCSS' => 'c6538c',
+      'YAML' => 'cb171e', 'TOML' => '9c4221', 'INI' => '6b7280', 'XML' => '0060ac',
+      'Markdown' => '083fa1', 'Makefile' => '427819', 'Dockerfile' => '384d54',
+      'SQL' => 'e38c00', 'GraphQL' => 'e10098', 'Proto' => '3b5998',
+      'Svelte' => 'ff3e00', 'Vue' => '41b883'
+    }.freeze
+
     VENDOR_DIRS = %w[
       vendor node_modules .git .bundle dist build out target coverage
       .venv venv env __pycache__ .mypy_cache .pytest_cache .tox .eggs .ruff_cache
@@ -64,6 +82,7 @@ module PrettyGit
         items = calculate(repo, include_globs: filters.paths, exclude_globs: filters.exclude_paths)
         total = total_bytes(items)
         items = add_percents(items, total)
+        items = add_colors(items)
         items = sort_and_limit(items, filters.limit)
 
         build_result(repo, items, total)
@@ -130,11 +149,21 @@ module PrettyGit
       def self.add_percents(items, total)
         return items.map { |item| item.merge(percent: 0.0) } unless total.positive?
 
-        items.map { |item| item.merge(percent: (item[:bytes] * 100.0 / total)) }
+        items.map do |item|
+          pct = (item[:bytes] * 100.0 / total).round(2)
+          item.merge(percent: pct)
+        end
+      end
+
+      def self.add_colors(items)
+        items.map do |item|
+          color = LANG_HEX_COLORS[item[:language]]
+          item.merge(color: color)
+        end
       end
 
       def self.sort_and_limit(items, limit)
-        sorted = items.sort_by { |item| [-item[:percent], item[:language]] }
+        sorted = items.sort_by { |item| [-item[:bytes], item[:language]] }
         lim = limit.to_i
         return sorted if lim <= 0
 
