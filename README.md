@@ -291,7 +291,7 @@ _Example terminal output (theme: basic)._
   {"report":"summary","generated_at":"2025-01-31T00:00:00Z","totals":{"commits":123}}
   ```
 
-### CSV (DR-001)
+### CSV
 * **Structure**: flat table, first line is header.
 * **Encoding**: UTF‑8 without BOM.
 * **Delimiter**: comma `,`.
