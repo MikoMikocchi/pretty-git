@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     pretty-git (0.1.0)
-      csv
-      rexml
+      csv (>= 3.0, < 5.0)
+      rexml (>= 3.2, < 4.0)
 
 GEM
   remote: https://rubygems.org/
