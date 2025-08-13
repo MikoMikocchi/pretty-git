@@ -13,7 +13,13 @@ Gem::Specification.new do |spec|
   spec.license       = 'MIT'
 
   spec.files         = Dir.chdir(__dir__) do
-    Dir['lib/**/*', 'README.md', 'LICENSE']
+    Dir[
+      'lib/**/*',
+      'bin/pretty-git',
+      'README*',
+      'LICENSE',
+      'CHANGELOG.md'
+    ]
   end
   spec.bindir        = 'bin'
   spec.executables   = ['pretty-git']
