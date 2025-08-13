@@ -1,3 +1,41 @@
+## Release
+
+Follow this checklist to release a new version and distribute via RubyGems and Homebrew:
+
+1) Version bump
+- Update `lib/pretty_git/version.rb` (SemVer).
+- Update `CHANGELOG.md` — move entries to a new section `X.Y.Z - YYYY-MM-DD`.
+
+2) Commit and tag
+- Commit the changes.
+- Create an annotated tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
+- Push: `git push && git push --tags`
+
+3) CI: publish to RubyGems (automated)
+- Workflow: `.github/workflows/release.yml` triggers on tags `v*.*.*`.
+- Requires repo secret `RUBYGEMS_API_KEY` with your RubyGems API key.
+- The job builds `pretty-git-*.gem` and runs `gem push`.
+
+4) CI: update Homebrew tap (automated)
+- Same workflow creates a PR to your tap with updated `url` and `sha256`.
+- Requirements:
+  - Repository variable `TAP_REPO` (e.g. `MikoMikocchi/homebrew-tap`).
+  - Optional repository variable `TAP_BRANCH` (default: `main`).
+  - Repository secret `TAP_GH_TOKEN` with `repo` scope to push a branch and open PR.
+
+5) Manual verification
+- After the RubyGems publish completes, ensure the tap PR passed CI and merge it.
+- Locally test:
+  ```bash
+  brew untap MikoMikocchi/tap || true
+  brew tap MikoMikocchi/tap
+  brew install pretty-git
+  pretty-git --version
+  ```
+
+Notes
+- The Homebrew formula installs the gem into `libexec/vendor` and wraps a single binary `pretty-git`; this avoids file-collision issues on reinstall.
+- For any hotfix without version change, you can bump `revision` in the tap formula.
 # Contributing to Pretty Git
 
 Thanks for your interest in contributing!
@@ -18,8 +56,8 @@ Be respectful. Help us keep a welcoming, inclusive community.
 ## Development Workflow
 - Run linter and tests locally before committing:
   ```bash
-  bundle exec rubocop -f s
-  bundle exec rspec -f documentation
+  RSpec: `bundle exec rspec`
+  RuboCop: `bundle exec rubocop`
   ```
 - Preferred commit style: Conventional Commits
   - feat(scope): summary

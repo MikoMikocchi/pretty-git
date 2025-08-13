@@ -1,6 +1,7 @@
 # Pretty Git
 
 [![CI](https://github.com/MikoMikocchi/pretty-git/actions/workflows/ci.yml/badge.svg)](https://github.com/MikoMikocchi/pretty-git/actions/workflows/ci.yml)
+[![Gem Version](https://img.shields.io/gem/v/pretty-git)](https://rubygems.org/gems/pretty-git)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Ruby 3.4+](https://img.shields.io/badge/ruby-3.4%2B-red)
 
@@ -59,6 +60,17 @@
 * __Git__: установлен и доступен в `PATH`
 
 ## Установка
+
+### Homebrew (рекомендуется)
+```bash
+brew tap MikoMikocchi/tap
+brew install pretty-git
+```
+
+### RubyGems
+```bash
+gem install pretty-git
+```
 Выберите один из вариантов:
 
 1) Локально из исходников (рекомендуется для разработки)
