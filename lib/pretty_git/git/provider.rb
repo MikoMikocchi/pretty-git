@@ -24,15 +24,13 @@ module PrettyGit
             current = nil
             stdout.each_line do |line|
               line = line.chomp
-              if record_separator?(line)
+              # Try to start a new commit from header on any line
+              header = start_commit_from_header(line)
+              if header
+                # emit previous commit if any
                 emit_current(yld, current)
-                current = nil
+                current = header
                 next
-              end
-
-              if current.nil?
-                current = start_commit_from_header(line)
-                next if current
               end
 
               next if line.empty?
@@ -84,7 +82,7 @@ module PrettyGit
           author_name: author_name,
           author_email: author_email,
           authored_at: Time.parse(authored_at).utc.iso8601,
-          message: subject,
+          message: subject.delete(SEP_RECORD),
           files: []
         }
       end
