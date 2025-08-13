@@ -15,7 +15,7 @@ module PrettyGit
       '.sh' => 'Shell', '.bash' => 'Shell', '.zsh' => 'Shell',
       '.ps1' => 'PowerShell', '.psm1' => 'PowerShell',
       '.bat' => 'Batchfile', '.cmd' => 'Batchfile',
-      # Intentionally excluding JSON (usually data, not source code)
+      '.json' => 'JSON',
       '.yml' => 'YAML', '.yaml' => 'YAML', '.toml' => 'TOML', '.ini' => 'INI', '.xml' => 'XML',
       '.html' => 'HTML', '.htm' => 'HTML', '.css' => 'CSS', '.scss' => 'SCSS', '.sass' => 'SCSS',
       '.md' => 'Markdown', '.markdown' => 'Markdown',
@@ -55,6 +55,7 @@ module PrettyGit
       'Elixir' => '6e4a7e', 'Erlang' => 'b83998',
       'Shell' => '89e051', 'PowerShell' => '012456', 'Batchfile' => 'c1f12e',
       'HTML' => 'e34c26', 'CSS' => '563d7c', 'SCSS' => 'c6538c',
+      'JSON' => 'eeeeee',
       'YAML' => 'cb171e', 'TOML' => '9c4221', 'INI' => '6b7280', 'XML' => '0060ac',
       'Markdown' => '083fa1', 'Makefile' => '427819', 'Dockerfile' => '384d54',
       'SQL' => 'e38c00', 'GraphQL' => 'e10098', 'Proto' => '3b5998',
@@ -74,22 +75,25 @@ module PrettyGit
       .jar .class .dll .so .dylib
       .exe .bin .dat
     ].freeze
-    # Computes language distribution by summing file sizes per language.
-    # Similar to GitHub Linguist approach (bytes per language).
+    # Computes language distribution by bytes, files, and LOC per language.
+    # Default metric: bytes (similar to GitHub Linguist approach).
+    # rubocop:disable Metrics/ClassLength
     class Languages
       def self.call(_enum, filters)
         repo = filters.repo_path
         items = calculate(repo, include_globs: filters.paths, exclude_globs: filters.exclude_paths)
-        total = total_bytes(items)
-        items = add_percents(items, total)
+        metric = (filters.metric || 'bytes').to_s
+        totals = compute_totals(items)
+        items = add_percents(items, totals, metric)
         items = add_colors(items)
-        items = sort_and_limit(items, filters.limit)
+        items = sort_and_limit(items, filters.limit, metric)
 
-        build_result(repo, items, total)
+        build_result(repo, items, totals, metric)
       end
 
+      # rubocop:disable Metrics/AbcSize
       def self.calculate(repo_path, include_globs:, exclude_globs:)
-        by_lang = Hash.new(0)
+        by_lang = Hash.new { |h, k| h[k] = { bytes: 0, files: 0, loc: 0 } }
         Dir.chdir(repo_path) do
           each_source_file(include_globs, exclude_globs) do |abs_path|
             basename = File.basename(abs_path)
@@ -97,16 +101,17 @@ module PrettyGit
             lang = FILENAME_TO_LANG[basename] || EXT_TO_LANG[ext]
             next unless lang
 
-            size = begin
-              File.size(abs_path)
-            rescue StandardError
-              0
-            end
-            by_lang[lang] += size
+            size = safe_file_size(abs_path)
+            lines = safe_count_lines(abs_path)
+            agg = by_lang[lang]
+            agg[:bytes] += size
+            agg[:files] += 1
+            agg[:loc] += lines
           end
         end
-        by_lang.map { |lang, bytes| { language: lang, bytes: bytes } }
+        by_lang.map { |lang, h| { language: lang, bytes: h[:bytes], files: h[:files], loc: h[:loc] } }
       end
+      # rubocop:enable Metrics/AbcSize
 
       def self.each_source_file(include_globs, exclude_globs)
         # Build list of files under repo respecting includes/excludes
@@ -115,6 +120,20 @@ module PrettyGit
         files = filter_includes(files, include_globs)
         files = filter_excludes(files, exclude_globs)
         files.each { |rel| yield File.expand_path(rel) }
+      end
+
+      def self.safe_file_size(path)
+        File.size(path)
+      rescue StandardError
+        0
+      end
+
+      def self.safe_count_lines(path)
+        count = 0
+        File.foreach(path) { |_l| count += 1 }
+        count
+      rescue StandardError
+        0
       end
 
       def self.filter_includes(files, globs)
@@ -142,15 +161,21 @@ module PrettyGit
         BINARY_EXTS.include?(File.extname(path).downcase)
       end
 
-      def self.total_bytes(items)
-        items.sum { |item| item[:bytes] }
+      def self.compute_totals(items)
+        {
+          bytes: items.sum { |i| i[:bytes] },
+          files: items.sum { |i| i[:files] },
+          loc: items.sum { |i| i[:loc] }
+        }
       end
 
-      def self.add_percents(items, total)
+      def self.add_percents(items, totals, metric)
+        total = totals[metric.to_sym].to_f
         return items.map { |item| item.merge(percent: 0.0) } unless total.positive?
 
         items.map do |item|
-          pct = (item[:bytes] * 100.0 / total).round(2)
+          val = item[metric.to_sym].to_f
+          pct = (val * 100.0 / total).round(2)
           item.merge(percent: pct)
         end
       end
@@ -162,23 +187,26 @@ module PrettyGit
         end
       end
 
-      def self.sort_and_limit(items, limit)
-        sorted = items.sort_by { |item| [-item[:bytes], item[:language]] }
+      def self.sort_and_limit(items, limit, metric)
+        key = metric.to_sym
+        sorted = items.sort_by { |item| [-item[key], item[:language]] }
         lim = limit.to_i
         return sorted if lim <= 0
 
         sorted.first(lim)
       end
 
-      def self.build_result(repo, items, total)
+      def self.build_result(repo, items, totals, metric)
         {
           report: 'languages',
           repo_path: repo,
+          metric: metric,
           generated_at: Time.now.utc.iso8601,
-          totals: { bytes: total, languages: items.size },
+          totals: totals.merge(languages: items.size),
           items: items
         }
       end
     end
+    # rubocop:enable Metrics/ClassLength
   end
 end

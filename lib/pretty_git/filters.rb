@@ -13,6 +13,7 @@ module PrettyGit
     :paths,
     :exclude_paths,
     :time_bucket,
+    :metric,
     :limit,
     :format,
     :out,

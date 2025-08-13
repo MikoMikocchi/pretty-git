@@ -26,9 +26,11 @@ module PrettyGit
       def render(io, table, data, color: true)
         title(io, data, color)
         io.puts
-        table_rows = rows(data[:items])
+        metric = (data[:metric] || 'bytes').to_s
+        table_rows = rows(data[:items], metric)
         colorizer = ->(row) { LANG_ANSI_COLOR_CODES[row[:language]] }
-        table.print(%w[language bytes percent], table_rows, highlight_max: false, first_col_colorizer: colorizer)
+        headers = ['language', metric, 'percent']
+        table.print(headers, table_rows, highlight_max: false, first_col_colorizer: colorizer)
         io.puts
         io.puts "Generated at: #{data[:generated_at]}"
       end
@@ -37,9 +39,10 @@ module PrettyGit
         io.puts Colors.title("Languages for #{data[:repo_path]}", color)
       end
 
-      def rows(items)
+      def rows(items, metric)
+        key = metric.to_sym
         items.map do |item|
-          { language: item[:language], bytes: item[:bytes], percent: format('%.1f', item[:percent]) }
+          { language: item[:language], key => item[key], percent: format('%.2f', item[:percent]) }
         end
       end
     end

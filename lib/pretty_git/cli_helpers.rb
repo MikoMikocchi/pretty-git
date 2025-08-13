@@ -7,9 +7,11 @@ require_relative 'app'
 module PrettyGit
   # Helpers extracted from `PrettyGit::CLI` to keep the CLI class small
   # and RuboCop-compliant. Provides parser configuration and execution utilities.
+  # rubocop:disable Metrics/ModuleLength
   module CLIHelpers
     REPORTS = %w[summary activity authors files heatmap languages].freeze
     FORMATS = %w[console json csv md yaml xml].freeze
+    METRICS = %w[bytes files loc].freeze
 
     module_function
 
@@ -19,6 +21,7 @@ module PrettyGit
       add_time_author_options(opts, options)
       add_path_limit_options(opts, options)
       add_format_output_options(opts, options)
+      add_metric_options(opts, options)
       add_misc_options(opts, options)
     end
 
@@ -48,6 +51,12 @@ module PrettyGit
       opts.on('--theme NAME', 'console color theme: basic|bright|mono') { |val| options[:theme] = val }
     end
 
+    def add_metric_options(opts, options)
+      opts.on('--metric NAME', 'languages metric: bytes|files|loc (default: bytes)') do |val|
+        options[:metric] = val
+      end
+    end
+
     def add_misc_options(opts, options)
       opts.on('--version', 'Show version') { options[:_version] = true }
       opts.on('--help', 'Show help') { options[:_help] = true }
@@ -66,7 +75,7 @@ module PrettyGit
       code = handle_version_help(options, parser, out)
       return code unless code.nil?
 
-      return nil if valid_report?(options[:report]) && valid_theme?(options[:theme])
+      return nil if valid_report?(options[:report]) && valid_theme?(options[:theme]) && valid_metric?(options[:metric])
 
       print_validation_errors(options, err)
       1
@@ -87,15 +96,20 @@ module PrettyGit
     def valid_report?(report) = REPORTS.include?(report)
     def valid_theme?(theme) = %w[basic bright mono].include?(theme)
 
+    def valid_metric?(metric)
+      metric.nil? || METRICS.include?(metric)
+    end
+
     def print_validation_errors(options, err)
       supported = REPORTS.join(', ')
       unless valid_report?(options[:report])
         err.puts "Unknown report: #{options[:report]}."
         err.puts "Supported: #{supported}"
       end
-      return if valid_theme?(options[:theme])
+      err.puts "Unknown theme: #{options[:theme]}. Supported: basic, bright, mono" unless valid_theme?(options[:theme])
+      return if valid_metric?(options[:metric])
 
-      err.puts "Unknown theme: #{options[:theme]}. Supported: basic, bright, mono"
+      err.puts "Unknown metric: #{options[:metric]}. Supported: #{METRICS.join(', ')}"
     end
 
     def build_filters(options)
@@ -109,6 +123,7 @@ module PrettyGit
         paths: options[:paths],
         exclude_paths: options[:exclude_paths],
         time_bucket: options[:time_bucket],
+        metric: options[:metric],
         limit: options[:limit],
         format: options[:format],
         out: options[:out],
@@ -127,4 +142,5 @@ module PrettyGit
       PrettyGit::App.new.run(report, filters, out: out, err: err)
     end
   end
+  # rubocop:enable Metrics/ModuleLength
 end

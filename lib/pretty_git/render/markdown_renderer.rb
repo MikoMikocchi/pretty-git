@@ -8,6 +8,7 @@ module PrettyGit
         @io = io
       end
 
+      # rubocop:disable Metrics/CyclomaticComplexity
       def call(report, result, _filters)
         case report
         when 'summary'
@@ -21,11 +22,14 @@ module PrettyGit
         when 'heatmap'
           render_table('Heatmap', %w[dow hour commits], result[:items])
         when 'languages'
-          render_table('Languages', %w[language bytes percent color], result[:items])
+          metric = (result[:metric] || 'bytes').to_s
+          headers = ['language', metric, 'percent', 'color']
+          render_table('Languages', headers, result[:items])
         else
           @io.puts result.inspect
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       private
 
