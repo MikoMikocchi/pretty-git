@@ -134,6 +134,7 @@ Key options:
 * **--path/--exclude-path** Filter by paths (comma-separated or repeated option)
 * **--no-color** Disable colors in console
 * **--theme** `basic|bright|mono` — console theme (default `basic`; `mono` forces monochrome)
+* **--metric** `bytes|files|loc` — metric for `languages` report (default `bytes`)
 
 Examples with multiple values:
 
@@ -234,7 +235,7 @@ dow,hour,commits
 ```bash
 pretty-git languages . --format md --limit 10
 ```
-Determines language distribution in a repository by summing file bytes per language (similar to GitHub Linguist). Output includes language, total size (bytes) and percent share.
+Determines language distribution in a repository. Supports multiple metrics: `bytes`, `files`, `loc` (default: `bytes`). Output includes language, selected metric column, and percent share; console shows language colors.
 
 Console example:
 ```text
@@ -252,7 +253,7 @@ Markdown      1200     1.7
 Notes:
 - **Detection**: by file extensions and certain filenames (`Makefile`, `Dockerfile`).
 - **Exclusions**: binary files and "vendor"-like directories are ignored. By default `vendor/`, `node_modules/`, `.git/`, build artifacts and caches are skipped. For Python projects additional directories are skipped: `.venv/`, `venv/`, `env/`, `__pycache__/`, `.mypy_cache/`, `.pytest_cache/`, `.tox/`, `.eggs/`, `.ruff_cache/`, `.ipynb_checkpoints/`.
-- **JSON**: JSON is not counted as a language by default to avoid data files skewing statistics.
+- **JSON**: JSON is included as a language. If large data files skew results, consider narrowing with `--path/--exclude-path`.
 - **Path filters**: use `--path/--exclude-path` (glob patterns supported) to focus on relevant areas.
 - **Limit**: `--limit N` restricts number of rows; `0`/`all` — no limit.
 - **Console colors**: language names use approximate GitHub colors; `--no-color` disables, `--theme mono` makes output monochrome.
@@ -260,8 +261,8 @@ Notes:
 See also: [Ignored directories and files](#ignored-directories-and-files).
 
 Export:
-- CSV/MD: columns — `language,bytes,percent`.
-- JSON/YAML/XML: full report structure including metadata (`report`, `generated_at`, `repo_path`).
+- CSV/MD: columns are dynamic — `language,<metric>,percent`. Markdown also includes a `color` column.
+- JSON/YAML/XML: full report structure including per-language `color` and metadata (`report`, `generated_at`, `repo_path`).
 
 ## Exports
 

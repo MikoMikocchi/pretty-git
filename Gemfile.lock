@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pretty-git (0.1.1)
+    pretty-git (0.1.2)
       csv (>= 3.0, < 5.0)
       rexml (>= 3.2, < 4.0)
 

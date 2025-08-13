@@ -16,7 +16,7 @@ module PrettyGit
       end
 
       # Returns Enumerator of PrettyGit::Types::Commit
-      # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
+      # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       def each_commit
         Enumerator.new do |yld|
           cmd = build_git_command
@@ -48,7 +48,7 @@ module PrettyGit
           end
         end
       end
-      # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
       private
 

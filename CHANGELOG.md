@@ -7,6 +7,20 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ## [Unreleased]
  
 
+## [0.1.2] - 2025-08-13
+### Added
+- Languages report: support multiple metrics — `bytes`, `files`, `loc`; dynamic columns in Console/CSV/Markdown; color and percent fields in output.
+- CLI: `--metric` option for the `languages` report with value validation.
+
+### Changed
+- Languages: JSON language reinstated in the mapping and color scheme; sorting and percent calculations are based on the selected metric; percentages rounded to two decimals.
+- Renderers: updated `csv`, `markdown`, and console renderers to work with dynamic metrics.
+- Internal specs updated: `specs/output_formats.md`, `specs/cli_spec.md`, `specs/languages_map.md`.
+
+### Fixed
+- Git provider: correct commit counting — emit a new commit when a header is read and remove the record separator from the subject (`lib/pretty_git/git/provider.rb`).
+- RuboCop: targeted suppressions for complex methods/classes and style fixes in `cli_helpers.rb`.
+
 ## [0.1.1] - 2025-08-13
 ### Changed
 - Release automation: added GitHub Actions workflow to publish gem on tags and open PR to Homebrew tap (`.github/workflows/release.yml`).
