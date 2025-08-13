@@ -41,11 +41,20 @@ jobs:
           echo "Tag version: $TAG_VER"
           echo "Gem version: $GEM_VER"
 
-      - name: Publish to RubyGems
-        if: ${{ secrets.RUBYGEMS_API_KEY != '' && steps.vers.outputs.tag == steps.vers.outputs.gem }}
+      - name: Publish to RubyGems (guarded)
         env:
           RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+          TAG_VER: ${{ steps.vers.outputs.tag }}
+          GEM_VER: ${{ steps.vers.outputs.gem }}
         run: |
+          if [ -z "$RUBYGEMS_API_KEY" ]; then
+            echo "No RUBYGEMS_API_KEY secret; skipping publish";
+            exit 0;
+          fi
+          if [ "$TAG_VER" != "$GEM_VER" ]; then
+            echo "Tag ($TAG_VER) != Gem version ($GEM_VER); skipping publish";
+            exit 0;
+          fi
           GEM_FILE=$(ls -1 pretty-git-*.gem | tail -n1)
           echo "Pushing $GEM_FILE to RubyGems"
           mkdir -p ~/.gem
@@ -63,11 +72,22 @@ jobs:
     name: Update Homebrew Tap
     needs: build-and-publish-gem
     runs-on: ubuntu-latest
-    if: ${{ secrets.TAP_GH_TOKEN != '' && vars.TAP_REPO != '' }}
     env:
       TAP_REPO: ${{ vars.TAP_REPO }} # e.g. MikoMikocchi/homebrew-tap
       TAP_BRANCH: ${{ vars.TAP_BRANCH || 'main' }}
     steps:
+      - name: Gate (check inputs)
+        id: gate
+        env:
+          TOKEN: ${{ secrets.TAP_GH_TOKEN }}
+          TAP_REPO: ${{ env.TAP_REPO }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$TAP_REPO" ]; then
+            echo "run=true" >> $GITHUB_OUTPUT
+          else
+            echo "run=false" >> $GITHUB_OUTPUT
+            echo "Missing TAP_GH_TOKEN or TAP_REPO; steps will be skipped"
+          fi
       - name: Check version match
         id: guard
         run: |
@@ -77,12 +97,14 @@ jobs:
           exit 0
 
       - name: Download gem artifact
+        if: ${{ steps.gate.outputs.run == 'true' }}
         uses: actions/download-artifact@v4
         with:
           name: gem
           path: dist
 
       - name: Compute SHA256
+        if: ${{ steps.gate.outputs.run == 'true' }}
         id: shasum
         run: |
           GEM_FILE=$(ls -1 dist/pretty-git-*.gem | tail -n1)
@@ -90,6 +112,7 @@ jobs:
           echo "sha256=$(shasum -a 256 \"$GEM_FILE\" | awk '{print $1}')" >> $GITHUB_OUTPUT
 
       - name: Extract gem version
+        if: ${{ steps.gate.outputs.run == 'true' }}
         id: ver
         run: |
           # Read gem version from gemspec file name (artifact)
@@ -99,12 +122,14 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Clone tap repository
+        if: ${{ steps.gate.outputs.run == 'true' }}
         run: |
           git clone "https://github.com/${TAP_REPO}.git" tap
           cd tap
           git checkout "$TAP_BRANCH" || git checkout -b "$TAP_BRANCH"
 
       - name: Update formula
+        if: ${{ steps.gate.outputs.run == 'true' }}
         run: |
           set -euo pipefail
           FORMULA=tap/Formula/pretty-git.rb
@@ -125,6 +150,7 @@ jobs:
           rm -f "$FORMULA.bak"
 
       - name: Create PR to tap
+        if: ${{ steps.gate.outputs.run == 'true' }}
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.TAP_GH_TOKEN }}
