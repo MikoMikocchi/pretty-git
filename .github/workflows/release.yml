@@ -55,6 +55,13 @@ jobs:
             echo "Tag ($TAG_VER) != Gem version ($GEM_VER); skipping publish";
             exit 0;
           fi
+
+          # Skip if this gem version is already on RubyGems
+          if curl -fsSL https://rubygems.org/api/v1/versions/pretty-git.json | grep -q '"number":"'"$GEM_VER"'"'; then
+            echo "pretty-git $GEM_VER already published on RubyGems; skipping push";
+            exit 0;
+          fi
+
           GEM_FILE=$(ls -1 pretty-git-*.gem | tail -n1)
           echo "Pushing $GEM_FILE to RubyGems"
           mkdir -p ~/.gem
