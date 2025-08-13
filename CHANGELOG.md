@@ -7,6 +7,15 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ## [Unreleased]
  
 
+## [0.1.1] - 2025-08-13
+### Changed
+- Release automation: added GitHub Actions workflow to publish gem on tags and open PR to Homebrew tap (`.github/workflows/release.yml`).
+- Documentation: README badges and installation instructions for Homebrew and RubyGems in `README.md` and `README.ru.md`.
+- Gemspec: bounded runtime dependencies for `csv` and `rexml` to satisfy RubyGems recommendations.
+
+### Fixed
+- Homebrew formula installation stability: formula installs gem into `libexec/vendor` and wraps `pretty-git` binary to avoid file collisions on reinstall.
+
 ## [0.1.0] - 2025-08-13
 ### Added
 - Languages report: bytes per language, percentages, sorting, limit.
