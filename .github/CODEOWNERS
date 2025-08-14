@@ -1,7 +1,7 @@
 # CODEOWNERS for internal specs and tooling
-# Requests touching specs/ will require review from the owner below.
+# Requests touching docs/ will require review from the owner below.
 
-/specs/** @MikoMikocchi
+/docs/** @MikoMikocchi
 
 # Tooling and workflows
 /.github/workflows/validate-specs.yml @MikoMikocchi

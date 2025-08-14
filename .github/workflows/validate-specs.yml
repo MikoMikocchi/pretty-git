@@ -4,14 +4,14 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'specs/**'
+      - 'docs/**'
       - '.github/workflows/validate-specs.yml'
       - '.markdownlint.yml'
       - '.mdlrc'
       - 'lychee.toml'
   pull_request:
     paths:
-      - 'specs/**'
+      - 'docs/**'
       - '.github/workflows/validate-specs.yml'
       - '.markdownlint.yml'
       - '.mdlrc'
@@ -36,7 +36,7 @@ jobs:
       - name: Link check (lychee)
         uses: lycheeverse/lychee-action@v2
         with:
-          # Use our config to scan specs/**/*.md
+          # Use our config to scan docs/**/*.md
           args: --config lychee.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
