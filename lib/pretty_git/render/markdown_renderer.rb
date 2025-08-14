@@ -33,7 +33,8 @@ module PrettyGit
 
         headers = headers_for(report, result)
         title = title_for(report)
-        render_table(title, headers, result[:items])
+        rows = sort_rows(report, result[:items], result)
+        render_table(title, headers, rows)
       end
 
       private
@@ -81,6 +82,49 @@ module PrettyGit
           @io.puts "| #{headers.map { |h| r[h.to_sym] }.join(' | ')} |"
         end
         @io.puts 'No data' if rows.empty?
+      end
+
+      # Deterministic ordering per docs/determinism.md
+      def sort_rows(report, rows, ctx = nil)
+        return rows unless rows.is_a?(Array)
+
+        case report
+        when 'hotspots'
+          rows.sort_by { |r| [-to_f(r[:score]), -to_i(r[:commits]), -to_i(r[:changes]), to_s(r[:path])] }
+        when 'churn'
+          rows.sort_by { |r| [-to_i(r[:churn]), -to_i(r[:commits]), to_s(r[:path])] }
+        when 'ownership'
+          rows.sort_by { |r| [-to_f(r[:owner_share]), -to_i(r[:authors]), to_s(r[:path])] }
+        when 'files'
+          rows.sort_by { |r| [-to_i(r[:changes]), -to_i(r[:commits]), to_s(r[:path])] }
+        when 'authors'
+          rows.sort_by { |r| [-to_i(r[:commits]), -to_i(r[:additions]), -to_i(r[:deletions]), to_s(r[:author_email])] }
+        when 'languages'
+          metric = (ctx && ctx[:metric]) ? ctx[:metric].to_sym : :bytes
+          rows.sort_by { |r| [-to_i(r[metric]), to_s(r[:language])] }
+        when 'activity'
+          rows.sort_by { |r| [to_s(r[:timestamp])] }
+        when 'heatmap'
+          rows.sort_by { |r| [to_i(r[:dow] || r[:day] || r[:weekday]), to_i(r[:hour])] }
+        else
+          rows
+        end
+      end
+
+      def to_i(v)
+        Integer(v || 0)
+      rescue StandardError
+        0
+      end
+
+      def to_f(v)
+        Float(v || 0.0)
+      rescue StandardError
+        0.0
+      end
+
+      def to_s(v)
+        (v || '').to_s
       end
     end
   end
