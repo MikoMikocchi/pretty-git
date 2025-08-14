@@ -1,0 +1,20 @@
+name: Release Safety Check
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  release_safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      - run: bundle install --jobs 4 --retry 3
+      - name: Verify gem contents (no internal docs/configs)
+        run: bundle exec rake release:check_gem_files

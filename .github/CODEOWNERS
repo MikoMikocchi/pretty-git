@@ -1,0 +1,11 @@
+# CODEOWNERS for internal specs and tooling
+# Requests touching specs/ will require review from the owner below.
+
+/specs/** @MikoMikocchi
+
+# Tooling and workflows
+/.github/workflows/validate-specs.yml @MikoMikocchi
+/.github/workflows/release-safety.yml @MikoMikocchi
+/.markdownlint.yml @MikoMikocchi
+/.mdlrc @MikoMikocchi
+/lychee.toml @MikoMikocchi
