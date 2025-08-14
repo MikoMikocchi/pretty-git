@@ -1,0 +1,42 @@
+name: Validate Specs
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'specs/**'
+      - '.github/workflows/validate-specs.yml'
+      - '.markdownlint.yml'
+      - '.mdlrc'
+      - 'lychee.toml'
+  pull_request:
+    paths:
+      - 'specs/**'
+      - '.github/workflows/validate-specs.yml'
+      - '.markdownlint.yml'
+      - '.mdlrc'
+      - 'lychee.toml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+      - run: bundle install --jobs 4 --retry 3
+      - name: Validate JSON examples
+        run: bundle exec rake validate:json
+      - name: Validate XML examples
+        run: bundle exec rake validate:xml
+      - name: Markdown lint (mdl)
+        run: bundle exec rake lint:markdown
+      - name: Link check (lychee)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Use our config to scan specs/**/*.md
+          args: --config lychee.toml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
