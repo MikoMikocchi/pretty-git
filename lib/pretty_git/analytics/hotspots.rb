@@ -21,17 +21,19 @@ module PrettyGit
           acc = Hash.new { |h, k| h[k] = { commits: 0, additions: 0, deletions: 0 } }
           enum.each do |commit|
             seen = {}
-            commit.files&.each do |f|
-              path = f.path
-              unless seen[path]
-                acc[path][:commits] += 1
-                seen[path] = true
-              end
-              acc[path][:additions] += f.additions.to_i
-              acc[path][:deletions] += f.deletions.to_i
-            end
+            commit.files&.each { |f| process_file_entry(acc, seen, f) }
           end
           acc
+        end
+
+        def process_file_entry(acc, seen, file_stat)
+          path = file_stat.path
+          unless seen[path]
+            acc[path][:commits] += 1
+            seen[path] = true
+          end
+          acc[path][:additions] += file_stat.additions.to_i
+          acc[path][:deletions] += file_stat.deletions.to_i
         end
 
         def build_items(per_file)
