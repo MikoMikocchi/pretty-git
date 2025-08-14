@@ -1,0 +1,6 @@
+# Exclude internal docs and CI/config files from GitHub source archives
+docs/ export-ignore
+.github/ export-ignore
+.mdlrc export-ignore
+.markdownlint.yml export-ignore
+lychee.toml export-ignore

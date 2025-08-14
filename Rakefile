@@ -18,8 +18,8 @@ namespace :validate do
     require 'json'
     require 'json_schemer'
     base = File.expand_path(__dir__)
-    schemas_dir = File.join(base, 'specs', 'export_schemas', 'json')
-    examples_dir = File.join(base, 'specs', 'examples', 'json')
+    schemas_dir = File.join(base, 'docs', 'export_schemas', 'json')
+    examples_dir = File.join(base, 'docs', 'examples', 'json')
 
     mapping = {
       'hotspots.json' => File.join(schemas_dir, 'hotspots.schema.json'),
@@ -53,8 +53,8 @@ namespace :validate do
   task :xml do
     require 'nokogiri'
     base = File.expand_path(__dir__)
-    xsds_dir = File.join(base, 'specs', 'export_schemas', 'xml')
-    examples_dir = File.join(base, 'specs', 'examples', 'xml')
+    xsds_dir = File.join(base, 'docs', 'export_schemas', 'xml')
+    examples_dir = File.join(base, 'docs', 'examples', 'xml')
 
     mapping = {
       'hotspots.xml' => File.join(xsds_dir, 'hotspots.xsd'),
@@ -89,7 +89,7 @@ end
 namespace :lint do
   desc 'Markdown lint (mdl)'
   task :markdown do
-    sh 'bundle exec mdl -g specs'
+    sh 'bundle exec mdl -g docs'
   end
 end
 
@@ -115,7 +115,7 @@ namespace :release do
       files = Dir.chdir(unpacked_root) { Dir['**/*'].select { |p| File.file?(File.join(unpacked_root, p)) } }
 
       disallowed = [
-        %r{^specs/},
+        %r{^(specs|docs)/},
         %r{^\.github/},
         /^\.mdlrc$/,
         /^\.markdownlint\.yml$/,
