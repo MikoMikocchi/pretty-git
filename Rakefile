@@ -89,7 +89,9 @@ end
 namespace :lint do
   desc 'Markdown lint (mdl)'
   task :markdown do
-    sh 'bundle exec mdl -g docs'
+    # Use local .mdlrc as STYLE (-s) so rule excludes apply (mdl 0.13.0)
+    mdl_style = File.expand_path('.mdlrc', __dir__)
+    sh "bundle exec mdl -s #{mdl_style} docs"
   end
 end
 
