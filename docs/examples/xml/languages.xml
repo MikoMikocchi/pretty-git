@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<languagesReport>
+  <report>languages</report>
+  <generated_at>2025-08-14T14:20:52Z</generated_at>
+  <repo_path>/path/to/repo</repo_path>
+  <metric>bytes</metric>
+  <items>
+    <item>
+      <language>Ruby</language>
+      <bytes>1024</bytes>
+      <files>5</files>
+      <loc>300</loc>
+      <percent>80.0</percent>
+      <color>#701516</color>
+    </item>
+    <item>
+      <language>Shell</language>
+      <bytes>256</bytes>
+      <files>2</files>
+      <loc>50</loc>
+      <percent>20.0</percent>
+      <color>#89e051</color>
+    </item>
+  </items>
+</languagesReport>

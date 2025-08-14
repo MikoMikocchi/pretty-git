@@ -1,0 +1,15 @@
+{
+  "report": "hotspots",
+  "generated_at": "2025-08-14T14:20:52Z",
+  "repo_path": "/path/to/repo",
+  "items": [
+    {
+      "path": "lib/a.rb",
+      "score": 12.0,
+      "commits": 3,
+      "additions": 20,
+      "deletions": 8,
+      "changes": 28
+    }
+  ]
+}

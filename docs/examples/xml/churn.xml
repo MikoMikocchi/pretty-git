@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<churnReport>
+  <report>churn</report>
+  <generated_at>2025-08-14T14:20:52Z</generated_at>
+  <repo_path>/path/to/repo</repo_path>
+  <items>
+    <item>
+      <path>lib/a.rb</path>
+      <churn>28</churn>
+      <commits>3</commits>
+      <additions>20</additions>
+      <deletions>8</deletions>
+    </item>
+  </items>
+</churnReport>

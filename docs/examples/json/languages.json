@@ -1,0 +1,10 @@
+{
+  "report": "languages",
+  "generated_at": "2025-08-14T14:20:52Z",
+  "repo_path": "/path/to/repo",
+  "metric": "bytes",
+  "items": [
+    { "language": "Ruby", "bytes": 1024, "files": 5, "loc": 300, "percent": 80.0, "color": "#701516" },
+    { "language": "Shell", "bytes": 256, "files": 2, "loc": 50, "percent": 20.0, "color": "#89e051" }
+  ]
+}

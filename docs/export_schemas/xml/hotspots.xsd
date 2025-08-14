@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="hotspotsReport">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="report" type="xs:string" fixed="hotspots"/>
+        <xs:element name="generated_at" type="xs:dateTime"/>
+        <xs:element name="repo_path" type="xs:string"/>
+        <xs:element name="items">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="item" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="path" type="xs:string"/>
+                    <xs:element name="score" type="xs:double"/>
+                    <xs:element name="commits" type="xs:int"/>
+                    <xs:element name="additions" type="xs:int"/>
+                    <xs:element name="deletions" type="xs:int"/>
+                    <xs:element name="changes" type="xs:int"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

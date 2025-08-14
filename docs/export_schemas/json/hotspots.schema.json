@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "hotspots",
+  "type": "object",
+  "required": ["report", "generated_at", "repo_path", "items"],
+  "properties": {
+    "report": { "const": "hotspots" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "repo_path": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "score", "commits", "additions", "deletions", "changes"],
+        "properties": {
+          "path": { "type": "string" },
+          "score": { "type": "number" },
+          "commits": { "type": "integer" },
+          "additions": { "type": "integer" },
+          "deletions": { "type": "integer" },
+          "changes": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "churn",
+  "type": "object",
+  "required": ["report", "generated_at", "repo_path", "items"],
+  "properties": {
+    "report": { "const": "churn" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "repo_path": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "churn", "commits", "additions", "deletions"],
+        "properties": {
+          "path": { "type": "string" },
+          "churn": { "type": "integer" },
+          "commits": { "type": "integer" },
+          "additions": { "type": "integer" },
+          "deletions": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

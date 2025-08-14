@@ -1,0 +1,20 @@
+# Lychee link checker configuration
+# Check all Markdown files under docs/
+include = ["docs/**/*.md"]
+
+# Exclude localhost and mailto
+exclude = [
+  "http://localhost:*",
+  "https://localhost:*",
+  "mailto:*"
+]
+
+# Accept 429 with retry
+max_retries = 3
+retry_wait_time = 2
+
+# Timeout seconds
+timeout = 20
+
+# User agent to avoid blocks
+user_agent = "pretty-git-lychee/1.0"

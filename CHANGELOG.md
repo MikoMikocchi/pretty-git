@@ -30,7 +30,7 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ### Changed
 - Languages: JSON language reinstated in the mapping and color scheme; sorting and percent calculations are based on the selected metric; percentages rounded to two decimals.
 - Renderers: updated `csv`, `markdown`, and console renderers to work with dynamic metrics.
-- Internal specs updated: `specs/output_formats.md`, `specs/cli_spec.md`, `specs/languages_map.md`.
+- Internal specs updated: `docs/output_formats.md`, `docs/cli_spec.md`, `docs/languages_map.md`.
 
 ### Fixed
 - Git provider: correct commit counting — emit a new commit when a header is read and remove the record separator from the subject (`lib/pretty_git/git/provider.rb`).

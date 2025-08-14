@@ -1,0 +1,13 @@
+{
+  "report": "ownership",
+  "generated_at": "2025-08-14T14:20:52Z",
+  "repo_path": "/path/to/repo",
+  "items": [
+    {
+      "path": "lib/a.rb",
+      "owner": "Jane Doe <jane@example.com>",
+      "owner_share": 66.67,
+      "authors": 2
+    }
+  ]
+}

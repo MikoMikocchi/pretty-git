@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ownership",
+  "type": "object",
+  "required": ["report", "generated_at", "repo_path", "items"],
+  "properties": {
+    "report": { "const": "ownership" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "repo_path": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "owner", "owner_share", "authors"],
+        "properties": {
+          "path": { "type": "string" },
+          "owner": { "type": "string" },
+          "owner_share": { "type": "number" },
+          "authors": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

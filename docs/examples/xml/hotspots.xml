@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hotspotsReport>
+  <report>hotspots</report>
+  <generated_at>2025-08-14T14:20:52Z</generated_at>
+  <repo_path>/path/to/repo</repo_path>
+  <items>
+    <item>
+      <path>lib/a.rb</path>
+      <score>12.0</score>
+      <commits>3</commits>
+      <additions>20</additions>
+      <deletions>8</deletions>
+      <changes>28</changes>
+    </item>
+  </items>
+</hotspotsReport>
