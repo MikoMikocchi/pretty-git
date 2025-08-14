@@ -7,6 +7,21 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ## [Unreleased]
  
 
+## [0.1.3] - 2025-08-14
+### Added
+- New analytics reports: `hotspots`, `churn`, `ownership` with sorting, scoring, and limits.
+- Exporters: CSV and Markdown support for new reports with dynamic headers via mapping constants.
+- Docs: Detailed sections for new reports in `README.md` and `README.ru.md` with usage and examples (CSV/JSON/YAML/XML).
+
+### Changed
+- Console: dispatching and rendering wired for new reports; consistent theming and width handling.
+- CLI/App: unified analytics dispatch for all reports.
+- Docs: public READMEs cleaned up from internal DR-* mentions; anchors and headings aligned (CSV).
+
+### Fixed
+- Minor documentation inaccuracies and anchor mismatches.
+
+
 ## [0.1.2] - 2025-08-13
 ### Added
 - Languages report: support multiple metrics — `bytes`, `files`, `loc`; dynamic columns in Console/CSV/Markdown; color and percent fields in output.

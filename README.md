@@ -14,7 +14,7 @@
   <br>
 </p>
 
-Generator of rich reports for a local Git repository: summary, activity, authors, files, heatmap, languages. Output to Console and formats: JSON, CSV, Markdown, YAML, XML.
+Generator of rich reports for a local Git repository: summary, activity, authors, files, heatmap, languages, hotspots, churn, ownership. Output to Console and formats: JSON, CSV, Markdown, YAML, XML.
 
 — License: MIT.
 
@@ -35,10 +35,13 @@ Generator of rich reports for a local Git repository: summary, activity, authors
   - [files — by files](#files--by-files)
   - [heatmap — commit heatmap](#heatmap--commit-heatmap)
   - [languages — languages](#languages--languages)
+  - [hotspots — hotspots (risky files)](#hotspots--hotspots-risky-files)
+  - [churn — code churn by file](#churn--code-churn-by-file)
+  - [ownership — code ownership](#ownership--code-ownership)
 - [Exports](#exports)
   - [Console](#console)
   - [JSON](#json)
-  - [CSV (DR-001)](#csv-dr-001)
+  - [CSV](#csv)
   - [Markdown](#markdown)
   - [YAML](#yaml)
   - [XML](#xml)
@@ -49,17 +52,17 @@ Generator of rich reports for a local Git repository: summary, activity, authors
 - [Development](#development)
 - [License](#license)
 
-## Features
-* **Reports**: `summary`, `activity`, `authors`, `files`, `heatmap`, `languages`.
+## ✨ Features
+* **Reports**: `summary`, `activity`, `authors`, `files`, `heatmap`, `languages`, `hotspots`, `churn`, `ownership`.
 * **Filters**: branches, authors, paths, time period.
 * **Exports**: `console`, `json`, `csv`, `md`, `yaml`, `xml`.
 * **Output**: to stdout or file via `--out`.
 
-## Requirements
+## ⚙️ Requirements
 * **Ruby**: >= 3.4 (recommended 3.4.x)
 * **Git**: installed and available in `PATH`
 
-## Installation
+## 📦 Installation
 
 ### 🍺 Homebrew (recommended)
 ```bash
@@ -101,7 +104,7 @@ bundle install
 bundle exec pretty-git --help
 ```
 
-## Quick Start
+## 🚀 Quick Start
 ```bash
 # Repository summary to console
 bundle exec bin/pretty-git summary .
@@ -114,21 +117,21 @@ bundle exec bin/pretty-git activity . --time-bucket week --since 2025-01-01 \
   --paths app,lib --format csv --out activity.csv
 ```
 
-## CLI and Options
+## 🧰 CLI and Options
 General form:
 
 ```bash
 pretty-git <report> <repo_path> [options]
 ```
 
-Available reports: `summary`, `activity`, `authors`, `files`, `heatmap`, `languages`.
+Available reports: `summary`, `activity`, `authors`, `files`, `heatmap`, `languages`, `hotspots`, `churn`, `ownership`.
 
 Key options:
 * **--format, -f** `console|json|csv|md|yaml|xml` (default `console`)
 * **--out, -o** Path to write output file
 * **--limit, -l** Number of items shown; `all` or `0` — no limit
 * **--time-bucket** `day|week|month` (for `activity`)
-* **--since/--until** Date/time in ISO8601 or `YYYY-MM-DD` (DR-005)
+* **--since/--until** Date/time in ISO8601 or `YYYY-MM-DD`
 * **--branch** Multi-option, can be specified multiple times
 * **--author/--exclude-author** Filter by authors
 * **--path/--exclude-path** Filter by paths (comma-separated or repeated option)
@@ -165,15 +168,15 @@ pretty-git authors . --format csv --out authors.csv
 * `1` — user error (unknown report/format, bad arguments)
 * `2` — system error (git error etc.)
 
-## Reports and Examples
+## 📊 Reports and Examples
 
-### summary — repository summary
+### 🧭 summary — repository summary
 ```bash
 pretty-git summary . --format json
 ```
 Contains totals (commits, authors, additions, deletions) and top authors/files.
 
-### activity — activity (day/week/month)
+### 📆 activity — activity (day/week/month)
 ```bash
 pretty-git activity . --time-bucket week --format csv
 ```
@@ -186,7 +189,7 @@ JSON example:
 ]
 ```
 
-### authors — by authors
+### 👤 authors — by authors
 ```bash
 pretty-git authors . --format md --limit 10
 ```
@@ -199,7 +202,7 @@ Markdown example:
 | Bob   | b@example.com | 1 | 2 | 0 | 2.0 |
 ```
 
-### files — by files
+### 📁 files — by files
 ```bash
 pretty-git files . --paths app,lib --format csv
 ```
@@ -219,7 +222,7 @@ XML example:
 </files>
 ```
 
-### heatmap — commit heatmap
+### 🔥 heatmap — commit heatmap
 ```bash
 pretty-git heatmap . --format json
 ```
@@ -231,7 +234,7 @@ dow,hour,commits
 1,11,7
 ```
 
-### languages — languages
+### 🈺 languages — languages
 ```bash
 pretty-git languages . --format md --limit 10
 ```
@@ -264,11 +267,92 @@ Export:
 - CSV/MD: columns are dynamic — `language,<metric>,percent`. Markdown also includes a `color` column.
 - JSON/YAML/XML: full report structure including per-language `color` and metadata (`report`, `generated_at`, `repo_path`).
 
-## Exports
+### ⚠️ hotspots — hotspots (risky files)
+```bash
+pretty-git hotspots . --format csv --limit 20
+```
+Highlights riskier files combining change frequency and magnitude.
+
+CSV columns: `path,score,commits,additions,deletions,changes`.
+
+Example:
+```csv
+path,score,commits,additions,deletions,changes
+lib/a.rb,9.5,12,300,220,520
+app/b.rb,7.1,8,140,60,200
+```
+
+JSON example:
+```json
+{
+  "report": "hotspots",
+  "generated_at": "2025-01-31T00:00:00Z",
+  "repo_path": ".",
+  "items": [
+    {"path": "lib/a.rb", "score": 9.5, "commits": 12, "additions": 300, "deletions": 220, "changes": 520}
+  ]
+}
+```
+
+### 🔄 churn — code churn by file
+```bash
+pretty-git churn . --format md --limit 20
+```
+Measures code churn (amount of code changing frequently).
+
+CSV columns: `path,churn,commits,additions,deletions`.
+
+Markdown example:
+```markdown
+| path | churn | commits | additions | deletions |
+|---|---:|---:|---:|---:|
+| lib/a.rb | 520 | 12 | 300 | 220 |
+```
+
+YAML example:
+```yaml
+report: churn
+generated_at: '2025-01-31T00:00:00Z'
+repo_path: .
+items:
+  - path: lib/a.rb
+    churn: 520
+    commits: 12
+    additions: 300
+    deletions: 220
+```
+
+### 🏷️ ownership — code ownership
+```bash
+pretty-git ownership . --format csv --limit 50
+```
+Shows file ownership concentration per primary owner.
+
+CSV columns: `path,owner,owner_share,authors`.
+
+Notes:
+- `owner`: author identifier (name/email) with the largest share of edits.
+- `owner_share`: percent of edits by the owner (0..100).
+- `authors`: total unique authors who edited the file.
+
+XML example:
+```xml
+<ownership>
+  <report>ownership</report>
+  <generated_at>2025-01-31T00:00:00Z</generated_at>
+  <repo_path>.</repo_path>
+  <items>
+    <item path="lib/a.rb" owner="Alice <a@example.com>" owner_share="82.5" authors="2"/>
+  </items>
+  
+</ownership>
+```
+
+## 📤 Exports
 
 Below are exact serialization rules for each format to ensure compatibility with common tools (Excel, BI, CI, etc.).
 
-### Console
+### 🖥️ Console
 ![Console output — basic theme](docs/images/PrettyGitConsole.png)
 _Example terminal output (theme: basic)._ 
 * **Colors**: headers and table heads highlighted; totals: `commits` — yellow, `+additions` — green, `-deletions` — red. `--no-color` fully disables coloring.
@@ -279,7 +363,7 @@ _Example terminal output (theme: basic)._
 * **Purpose**: human-readable terminal output.
 * **Layout**: boxed tables, auto-truncation of long values.
 
-### JSON
+### 🧾 JSON
 * **Keys**: `snake_case`.
 * **Numbers**: integers/floats without localization (dot decimal separator).
 * **Boolean**: `true/false`; **null**: `null`.
@@ -311,7 +395,7 @@ _Example terminal output (theme: basic)._
   Bob,b@example.com,1,2,0,2.0
   ```
 
-### Markdown
+### 📝 Markdown
 * **Tables**: GitHub Flavored Markdown.
 * **Alignment**: numeric columns are right-aligned (`---:`).
 * **Encoding/line endings**: UTF‑8, LF.
@@ -324,7 +408,7 @@ _Example terminal output (theme: basic)._
   | app/models/user.rb | 42 | 2100 | 1400 |
   ```
 
-### YAML
+### 📄 YAML
 * **Structure**: full result hierarchy.
 * **Keys**: serialized as strings.
 * **Numbers/boolean/null**: standard YAML (`123`, `true/false`, `null`).
@@ -344,7 +428,7 @@ _Example terminal output (theme: basic)._
       commits: 1
   ```
 
-### XML
+### 🗂️ XML
 * **Structure**: elements correspond to keys; arrays — repeated `<item>` or specialized tags.
 * **Attributes**: for compact rows (e.g., files report) main fields may be attributes.
 * **Text nodes**: used for scalar values when needed.
@@ -362,7 +446,7 @@ _Example terminal output (theme: basic)._
   </authors>
   ```
 
-## Ignored directories and files
+## 🚫 Ignored directories and files
 
 To keep language statistics meaningful, certain directories and file types are skipped by default.
 
@@ -387,16 +471,16 @@ vendor, node_modules, .git, .bundle, dist, build, out, target, coverage,
 
 These lists mirror the implementation in `lib/pretty_git/analytics/languages.rb` and may evolve.
 
-## Determinism and Sorting
+## 🔁 Determinism and Sorting
 Output is deterministic given the same input. Sorting for files/authors: by changes (desc), then by commits (desc), then by path/name (asc). Limits are applied after sorting; `all` or `0` means no limit.
 
-## Windows Notes
+## 🪟 Windows Notes
 Primary targets — macOS/Linux. Windows is supported best‑effort:
 * Running via Git Bash/WSL is OK
 * Colors can be disabled by `--no-color`
 * Carefully quote arguments when working with paths
 
-## Diagnostics and Errors
+## 🩺 Diagnostics and Errors
 Typical issues and solutions:
 
 * **Unknown report/format** — check the first argument and `--format`.
@@ -405,12 +489,12 @@ Typical issues and solutions:
 * **Empty result** — check your filters (`--since/--until`, `--branch`, `--path`); your selection might be too narrow.
 * **CSV encoding issues** — files are saved as UTF‑8; when opening in Excel, pick UTF‑8.
 
-## FAQ
+## ❓ FAQ
 * **Why Ruby 3.4+?** The project uses dependencies aligned with Ruby 3.4+ and targets the current ecosystem.
 * **New formats?** Yes, add a renderer under `lib/pretty_git/render/` and wire it in the app.
 * **Where does data come from?** From system `git` via CLI calls.
 
-## Development
+## 🛠️ Development
 ```bash
 # Install deps
 bin/setup
@@ -422,5 +506,5 @@ bundle exec rubocop
 
 Style — RuboCop clean. Tests cover aggregators, renderers, CLI, and integration scenarios (determinism, format correctness).
 
-## License
+## 📄 License
 MIT © Contributors
