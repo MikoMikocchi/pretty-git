@@ -9,7 +9,7 @@ module PrettyGit
   # and RuboCop-compliant. Provides parser configuration and execution utilities.
   # rubocop:disable Metrics/ModuleLength
   module CLIHelpers
-    REPORTS = %w[summary activity authors files heatmap languages].freeze
+    REPORTS = %w[summary activity authors files heatmap languages hotspots churn ownership].freeze
     FORMATS = %w[console json csv md yaml xml].freeze
     METRICS = %w[bytes files loc].freeze
 

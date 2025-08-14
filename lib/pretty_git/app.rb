@@ -7,6 +7,9 @@ require_relative 'analytics/files'
 require_relative 'analytics/authors'
 require_relative 'analytics/heatmap'
 require_relative 'analytics/languages'
+require_relative 'analytics/hotspots'
+require_relative 'analytics/churn'
+require_relative 'analytics/ownership'
 require_relative 'render/json_renderer'
 require_relative 'render/console_renderer'
 require_relative 'render/csv_renderer'
@@ -62,22 +65,21 @@ module PrettyGit
     end
 
     def analytics_for(report, enum, filters)
-      case report
-      when 'summary'
-        Analytics::Summary.call(enum, filters)
-      when 'activity'
-        Analytics::Activity.call(enum, filters)
-      when 'authors'
-        Analytics::Authors.call(enum, filters)
-      when 'files'
-        Analytics::Files.call(enum, filters)
-      when 'heatmap'
-        Analytics::Heatmap.call(enum, filters)
-      when 'languages'
-        Analytics::Languages.call(enum, filters)
-      else
-        raise ArgumentError, "Unknown report: #{report}"
-      end
+      dispatch = {
+        'summary' => Analytics::Summary,
+        'activity' => Analytics::Activity,
+        'authors' => Analytics::Authors,
+        'files' => Analytics::Files,
+        'heatmap' => Analytics::Heatmap,
+        'languages' => Analytics::Languages,
+        'hotspots' => Analytics::Hotspots,
+        'churn' => Analytics::Churn,
+        'ownership' => Analytics::Ownership
+      }
+      klass = dispatch[report]
+      raise ArgumentError, "Unknown report: #{report}" unless klass
+
+      klass.call(enum, filters)
     end
   end
 end

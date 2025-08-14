@@ -153,6 +153,7 @@ module PrettyGit
     end
 
     # Renders human-friendly console output with optional colors.
+    # rubocop:disable Metrics/ClassLength
     class ConsoleRenderer
       def initialize(io: $stdout, color: true, theme: 'basic')
         @io = io
@@ -162,22 +163,21 @@ module PrettyGit
       end
 
       def call(report, result, _filters)
-        case report
-        when 'summary'
-          render_summary(result)
-        when 'activity'
-          render_activity(result)
-        when 'authors'
-          render_authors(result)
-        when 'files'
-          render_files(result)
-        when 'heatmap'
-          render_heatmap(result)
-        when 'languages'
-          LanguagesSection.render(@io, @table, result, color: @color)
-        else
-          @io.puts result.inspect
-        end
+        handlers = {
+          'summary' => method(:render_summary),
+          'activity' => method(:render_activity),
+          'authors' => method(:render_authors),
+          'files' => method(:render_files),
+          'heatmap' => method(:render_heatmap),
+          'languages' => ->(data) { LanguagesSection.render(@io, @table, data, color: @color) },
+          'hotspots' => method(:render_hotspots),
+          'churn' => method(:render_churn),
+          'ownership' => method(:render_ownership)
+        }
+        handler = handlers[report]
+        return @io.puts(result.inspect) unless handler
+
+        handler.call(result)
       end
 
       private
@@ -266,6 +266,42 @@ module PrettyGit
 
       # Languages rendering moved to PrettyGit::Render::LanguagesSection
 
+      def render_hotspots(data)
+        title "Hotspots for #{data[:repo_path]}"
+        line "Period: #{data.dig(:period, :since)} .. #{data.dig(:period, :until)}"
+
+        @io.puts
+        title 'Hotspots'
+        @table.print(%w[path score commits additions deletions], data[:items])
+
+        @io.puts
+        line "Generated at: #{data[:generated_at]}"
+      end
+
+      def render_churn(data)
+        title "Churn for #{data[:repo_path]}"
+        line "Period: #{data.dig(:period, :since)} .. #{data.dig(:period, :until)}"
+
+        @io.puts
+        title 'Churn'
+        @table.print(%w[path churn commits], data[:items])
+
+        @io.puts
+        line "Generated at: #{data[:generated_at]}"
+      end
+
+      def render_ownership(data)
+        title "Ownership for #{data[:repo_path]}"
+        line "Period: #{data.dig(:period, :since)} .. #{data.dig(:period, :until)}"
+
+        @io.puts
+        title 'Ownership'
+        @table.print(%w[path owner owner_share authors], data[:items])
+
+        @io.puts
+        line "Generated at: #{data[:generated_at]}"
+      end
+
       def title(text)
         @io.puts Colors.title(text, @color, @theme)
       end
@@ -276,5 +312,6 @@ module PrettyGit
 
       # table is handled by @table
     end
+    # rubocop:enable Metrics/ClassLength
   end
 end

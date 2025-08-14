@@ -9,7 +9,7 @@ require_relative 'cli_helpers'
 module PrettyGit
   # Command-line interface entry point.
   class CLI
-    SUPPORTED_REPORTS = %w[summary activity authors files heatmap languages].freeze
+    SUPPORTED_REPORTS = %w[summary activity authors files heatmap languages hotspots churn ownership].freeze
     SUPPORTED_FORMATS = %w[console json csv md yaml xml].freeze
 
     # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
