@@ -2,7 +2,7 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 3.4
   Exclude:
-    - 'specs/**/*'
+    - 'docs/**/*'
     - 'vendor/**/*'
     - 'bin/binstubs/**/*'
     - 'pkg/**/*'
