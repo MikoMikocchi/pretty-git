@@ -207,19 +207,31 @@ Markdown example:
 pretty-git files . --paths app,lib --format csv
 ```
 CSV columns: `path,commits,additions,deletions,changes`.
+
 XML example:
 ```xml
-<files>
-  <item path="app/models/user.rb" commits="42" additions="2100" deletions="1400" changes="3500" />
-  <item path="app/services/auth.rb" commits="35" additions="1500" deletions="900" changes="2400" />
+<?xml version="1.0" encoding="UTF-8"?>
+<report>
+  <report>files</report>
   <generated_at>2025-01-31T00:00:00Z</generated_at>
   <repo_path>/abs/path/to/repo</repo_path>
-  <report>files</report>
-  <period>
-    <since/>
-    <until/>
-  </period>
-</files>
+  <items>
+    <item>
+      <path>app/models/user.rb</path>
+      <commits>42</commits>
+      <additions>2100</additions>
+      <deletions>1400</deletions>
+      <changes>3500</changes>
+    </item>
+    <item>
+      <path>app/services/auth.rb</path>
+      <commits>35</commits>
+      <additions>1500</additions>
+      <deletions>900</deletions>
+      <changes>2400</changes>
+    </item>
+  </items>
+</report>
 ```
 
 ### 🔥 heatmap — commit heatmap
@@ -337,15 +349,20 @@ Notes:
 
 XML example:
 ```xml
-<ownership>
+<?xml version="1.0" encoding="UTF-8"?>
+<report>
   <report>ownership</report>
   <generated_at>2025-01-31T00:00:00Z</generated_at>
   <repo_path>.</repo_path>
   <items>
-    <item path="lib/a.rb" owner="Alice <a@example.com>" owner_share="82.5" authors="2"/>
+    <item>
+      <path>lib/a.rb</path>
+      <owner>Alice &lt;a@example.com&gt;</owner>
+      <owner_share>82.5</owner_share>
+      <authors>2</authors>
+    </item>
   </items>
-  
-</ownership>
+</report>
 ```
 
 ## 📤 Exports

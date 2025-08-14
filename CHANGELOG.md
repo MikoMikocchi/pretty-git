@@ -7,6 +7,19 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ## [Unreleased]
  
 
+## [0.1.4] - 2025-08-14
+### Added
+- Integration tests for new reports exports: CSV/Markdown/YAML/XML for `hotspots`, `churn`, `ownership`.
+- Schema validations: `rake validate:json`, `rake validate:xml` to ensure format compatibility.
+
+### Changed
+- Renderers (`MarkdownRenderer`, `YamlRenderer`, `XmlRenderer`): deterministic sorting for all new reports according to `docs/determinism.md`.
+- Documentation: `README.md` and `README.ru.md` updated with sections and examples for new reports and all export formats; XML examples unified to `<report>` root with nested elements.
+
+### Fixed
+- Minor docs inconsistencies and XML examples structure mismatches.
+
+
 ## [0.1.3] - 2025-08-14
 ### Added
 - New analytics reports: `hotspots`, `churn`, `ownership` with sorting, scoring, and limits.
