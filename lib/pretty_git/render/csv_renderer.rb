@@ -6,30 +6,33 @@ module PrettyGit
   module Render
     # Renders CSV according to specs/output_formats.md and DR-001
     class CsvRenderer
+      HEADERS = {
+        'activity' => %w[bucket timestamp commits additions deletions],
+        'authors' => %w[author author_email commits additions deletions avg_commit_size],
+        'files' => %w[path commits additions deletions changes],
+        'heatmap' => %w[dow hour commits],
+        'hotspots' => %w[path score commits additions deletions changes],
+        'churn' => %w[path churn commits additions deletions],
+        'ownership' => %w[path owner owner_share authors]
+      }.freeze
       def initialize(io: $stdout)
         @io = io
       end
 
       def call(report, result, _filters)
-        case report
-        when 'activity'
-          write_csv(%w[bucket timestamp commits additions deletions], result[:items])
-        when 'authors'
-          write_csv(%w[author author_email commits additions deletions avg_commit_size], result[:items])
-        when 'files'
-          write_csv(%w[path commits additions deletions changes], result[:items])
-        when 'heatmap'
-          write_csv(%w[dow hour commits], result[:items])
-        when 'languages'
-          metric = (result[:metric] || 'bytes').to_s
-          headers = ['language', metric, 'percent', 'color']
-          write_csv(headers, result[:items])
-        else
-          raise ArgumentError, "CSV output for report '#{report}' is not supported yet"
-        end
+        headers = headers_for(report, result)
+        write_csv(headers, result[:items])
       end
 
       private
+
+      def headers_for(report, result)
+        return ['language', (result[:metric] || 'bytes').to_s, 'percent', 'color'] if report == 'languages'
+
+        HEADERS.fetch(report) do
+          raise ArgumentError, "CSV output for report '#{report}' is not supported yet"
+        end
+      end
 
       def write_csv(headers, rows)
         csv = CSV.generate(force_quotes: false) do |out|

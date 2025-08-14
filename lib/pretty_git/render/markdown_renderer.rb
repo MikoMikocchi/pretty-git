@@ -4,34 +4,49 @@ module PrettyGit
   module Render
     # Renders Markdown tables and sections per specs/output_formats.md
     class MarkdownRenderer
+      TITLES = {
+        'activity' => 'Activity',
+        'authors' => 'Authors',
+        'files' => 'Top Files',
+        'heatmap' => 'Heatmap',
+        'languages' => 'Languages',
+        'hotspots' => 'Hotspots',
+        'churn' => 'Churn',
+        'ownership' => 'Ownership'
+      }.freeze
+
+      HEADERS = {
+        'activity' => %w[bucket timestamp commits additions deletions],
+        'authors' => %w[author author_email commits additions deletions avg_commit_size],
+        'files' => %w[path commits additions deletions changes],
+        'heatmap' => %w[dow hour commits],
+        'hotspots' => %w[path score commits additions deletions changes],
+        'churn' => %w[path churn commits additions deletions],
+        'ownership' => %w[path owner owner_share authors]
+      }.freeze
       def initialize(io: $stdout)
         @io = io
       end
 
-      # rubocop:disable Metrics/CyclomaticComplexity
       def call(report, result, _filters)
-        case report
-        when 'summary'
-          render_summary(result)
-        when 'activity'
-          render_table('Activity', %w[bucket timestamp commits additions deletions], result[:items])
-        when 'authors'
-          render_table('Authors', %w[author author_email commits additions deletions avg_commit_size], result[:items])
-        when 'files'
-          render_table('Top Files', %w[path commits additions deletions changes], result[:items])
-        when 'heatmap'
-          render_table('Heatmap', %w[dow hour commits], result[:items])
-        when 'languages'
-          metric = (result[:metric] || 'bytes').to_s
-          headers = ['language', metric, 'percent', 'color']
-          render_table('Languages', headers, result[:items])
-        else
-          @io.puts result.inspect
-        end
+        return render_summary(result) if report == 'summary'
+
+        headers = headers_for(report, result)
+        title = title_for(report)
+        render_table(title, headers, result[:items])
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
 
       private
+
+      def headers_for(report, result)
+        return ['language', (result[:metric] || 'bytes').to_s, 'percent', 'color'] if report == 'languages'
+
+        HEADERS.fetch(report, [])
+      end
+
+      def title_for(report)
+        TITLES.fetch(report, report.to_s.capitalize)
+      end
 
       def render_summary(data)
         header_summary(data)
