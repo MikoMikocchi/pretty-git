@@ -4,7 +4,7 @@ require 'csv'
 
 module PrettyGit
   module Render
-    # Renders CSV according to specs/output_formats.md and DR-001
+    # Renders CSV according to docs/output_formats.md and DR-001
     class CsvRenderer
       HEADERS = {
         'activity' => %w[bucket timestamp commits additions deletions],

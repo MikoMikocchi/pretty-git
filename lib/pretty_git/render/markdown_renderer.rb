@@ -2,7 +2,7 @@
 
 module PrettyGit
   module Render
-    # Renders Markdown tables and sections per specs/output_formats.md
+    # Renders Markdown tables and sections per docs/output_formats.md
     class MarkdownRenderer
       TITLES = {
         'activity' => 'Activity',
