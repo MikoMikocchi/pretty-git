@@ -57,4 +57,4 @@ build-iPhoneSimulator/
 /.vscode/
 
 # Perf profiling logs
-perf_profile_*.log
+*.log
