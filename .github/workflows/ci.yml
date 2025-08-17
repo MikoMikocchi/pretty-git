@@ -8,11 +8,12 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
+        os: [ ubuntu-latest, macos-latest ]
         ruby: [ '3.4' ]
 
     steps:
@@ -34,3 +35,14 @@ jobs:
 
       - name: RSpec
         run: bundle exec rspec --format documentation
+
+      - name: Validate JSON examples
+        run: bundle exec rake validate:json
+
+      - name: Validate XML examples
+        run: bundle exec rake validate:xml
+
+      - name: Smoke test (help/version)
+        run: |
+          bundle exec bin/pretty-git --help > /dev/null
+          bundle exec bin/pretty-git --version

@@ -1,6 +1,6 @@
 # Релизный пайплайн и чек‑лист (Pretty Git)
 
-Версия: 0.1 (актуально для релиза v0.1.1)
+Версия: 0.1 (актуально для релиза v0.1.4)
 Статус: Accepted
 
 ## Цели
@@ -29,11 +29,13 @@
    bundle exec rake build
    bundle exec rake spec
    bundle exec rubocop
+   bundle exec rake validate:json
+   bundle exec rake validate:xml
    ```
 4. Preflight (обязательно, до тега):
    - Gemfile.lock синхронизирован: `bundle install` → `git add Gemfile.lock` → `git commit`.
    - Версии совпадают: `git describe --tags --abbrev=0` ≠ новый `X.Y.Z`, а `lib/pretty_git/version.rb` и `CHANGELOG.md` указывают на новый.
-   - CI на ветке зелёный (lint/tests). Если нужно — дождаться.
+   - CI на ветке зелёный (lint/tests/schema validation/smoke). Если нужно — дождаться.
 
 5. Создать аннотированный тег и пуш:
    ```bash
@@ -42,7 +44,7 @@
    git tag -a vX.Y.Z -m "Pretty Git vX.Y.Z"
    git push origin vX.Y.Z
    ```
-5. Дождаться GitHub Actions: `release.yml`.
+6. Дождаться GitHub Actions: `release.yml`.
    - Убедиться, что шаг guard прошёл.
    - Проверить шаг `gem push` (может быть пропущен, если версия уже опубликована — OK).
    - Проверить создание PR в Homebrew tap.
@@ -63,7 +65,7 @@
   ```bash
   brew tap MikoMikocchi/tap
   brew install pretty-git
-  pretty-git summary --limit 1
+  pretty-git summary . --limit 1
   ```
 - Мини‑проверка форматов:
   ```bash

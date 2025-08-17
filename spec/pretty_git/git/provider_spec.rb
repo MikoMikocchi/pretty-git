@@ -106,5 +106,47 @@ RSpec.describe PrettyGit::Git::Provider do
         described_class.new(filters).each_commit.first
       end.to raise_error(StandardError, /fatal: not a git repository/)
     end
+
+    it 'skips commits by excluded authors' do
+      header = [
+        'beadface', 'CI Bot', 'bot@example.com', '2025-01-05T00:00:00Z', 'Bot commit'
+      ].join(us)
+      num = ['1', '0', 'README.md'].join("\t")
+      lines = [header, num, rs]
+      stdout = stdout_with_commits(lines)
+
+      allow(Open3).to receive(:popen3).and_yield(
+        instance_double(IO), stdout, instance_double(IO, read: ''), wait_thr_success
+      )
+
+      f = filters.dup
+      f.exclude_authors = ['bot']
+
+      commits = described_class.new(f).each_commit.to_a
+      expect(commits).to be_empty
+    end
+
+    it 'adds pathspec excludes and includes . when only excludes are provided' do
+      stdout = stdout_with_commits([rs])
+      captured_cmd = nil
+
+      allow(Open3).to receive(:popen3) do |*cmd, chdir:, &blk|
+        captured_cmd = cmd
+        blk.call(instance_double(IO), stdout, instance_double(IO, read: ''), wait_thr_success)
+      end
+
+      f = filters.dup
+      f.paths = []
+      f.exclude_paths = ['node_modules/**', 'vendor/**']
+
+      described_class.new(f).each_commit.to_a
+
+      idx = captured_cmd.index('--')
+      expect(idx).not_to be_nil
+      tail = captured_cmd[(idx + 1)..]
+      expect(tail).to include('.')
+      expect(tail).to include(':(exclude,glob)node_modules/**')
+      expect(tail).to include(':(exclude,glob)vendor/**')
+    end
   end
 end
