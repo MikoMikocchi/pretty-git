@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'open3'
 require_relative 'git/provider'
 require_relative 'analytics/summary'
 require_relative 'analytics/activity'
@@ -37,7 +38,9 @@ module PrettyGit
     private
 
     def ensure_repo!(path)
-      return if File.directory?(File.join(path, '.git'))
+      # Use git to reliably detect work-trees/worktrees/bare repos
+      stdout, _stderr, status = Open3.capture3('git', 'rev-parse', '--is-inside-work-tree', chdir: path)
+      return if status.success? && stdout.to_s.strip == 'true'
 
       raise ArgumentError, "Not a git repository: #{path}"
     end
@@ -47,21 +50,25 @@ module PrettyGit
     end
 
     def renderer_for(filters, io)
-      case filters.format
-      when 'console'
-        use_color = !filters.no_color && filters.theme != 'mono'
-        Render::ConsoleRenderer.new(io: io, color: use_color, theme: filters.theme)
-      when 'csv'
-        Render::CsvRenderer.new(io: io)
-      when 'md'
-        Render::MarkdownRenderer.new(io: io)
-      when 'yaml'
-        Render::YamlRenderer.new(io: io)
-      when 'xml'
-        Render::XmlRenderer.new(io: io)
-      else
-        Render::JsonRenderer.new(io: io)
+      if filters.format == 'console'
+        return Render::ConsoleRenderer.new(
+          io: io,
+          color: !filters.no_color && filters.theme != 'mono',
+          theme: filters.theme
+        )
       end
+
+      dispatch = {
+        'csv' => Render::CsvRenderer,
+        'md' => Render::MarkdownRenderer,
+        'yaml' => Render::YamlRenderer,
+        'xml' => Render::XmlRenderer,
+        'json' => Render::JsonRenderer
+      }
+      klass = dispatch[filters.format]
+      raise ArgumentError, "Unknown format: #{filters.format}" unless klass
+
+      klass.new(io: io)
     end
 
     def analytics_for(report, enum, filters)

@@ -2,6 +2,8 @@
 
 require 'spec_helper'
 require 'stringio'
+require_relative '../../../lib/pretty_git/git/provider'
+require_relative '../../../lib/pretty_git/filters'
 
 RSpec.describe PrettyGit::Git::Provider do
   let(:us) { "\x1F" } # unit separator
@@ -23,7 +25,7 @@ RSpec.describe PrettyGit::Git::Provider do
       paths: ['lib/'],
       exclude_paths: [],
       since: '2025-01-01T00:00:00Z',
-      until: '2025-02-01T00:00:00Z',
+      until_at: '2025-02-01T00:00:00Z',
       time_bucket: 'week',
       limit: 10,
       format: 'json',
@@ -87,10 +89,11 @@ RSpec.describe PrettyGit::Git::Provider do
       expect(captured_cmd.any? { |a| a.start_with?('--since=2025-01-01') }).to be true
       expect(captured_cmd.any? { |a| a.start_with?('--until=2025-02-01') }).to be true
       expect(captured_cmd).to include('--author=John')
-      expect(captured_cmd).to include('--branches=main')
-      # Paths are added after --
+      # Branches are passed as explicit revisions before '--'
       idx = captured_cmd.index('--')
       expect(idx).not_to be_nil
+      expect(captured_cmd[0...idx]).to include('main')
+      # Paths are added after --
       expect(captured_cmd[(idx + 1)..]).to include('lib/')
     end
 
@@ -148,6 +151,20 @@ RSpec.describe PrettyGit::Git::Provider do
       expect(tail).to include('.')
       expect(tail).to include(':(exclude,glob)node_modules/**')
       expect(tail).to include(':(exclude,glob)vendor/**')
+    end
+
+    it 'logs git command to stderr when verbose is enabled' do
+      stdout = stdout_with_commits([rs])
+      allow(Open3).to receive(:popen3).and_yield(
+        instance_double(IO), stdout, instance_double(IO, read: ''), wait_thr_success
+      )
+
+      verbose_filters = filters.dup
+      verbose_filters.verbose = true
+
+      expect do
+        described_class.new(verbose_filters).each_commit.to_a
+      end.to output(/\[pretty-git\] git cmd: .*git log/).to_stderr
     end
   end
 end

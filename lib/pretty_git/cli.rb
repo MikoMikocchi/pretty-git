@@ -9,9 +9,6 @@ require_relative 'cli_helpers'
 module PrettyGit
   # Command-line interface entry point.
   class CLI
-    SUPPORTED_REPORTS = %w[summary activity authors files heatmap languages hotspots churn ownership].freeze
-    SUPPORTED_FORMATS = %w[console json csv md yaml xml].freeze
-
     # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity
     def self.run(argv = ARGV, out: $stdout, err: $stderr)
       options = {
@@ -28,6 +25,7 @@ module PrettyGit
         out: nil,
         no_color: false,
         theme: 'basic',
+        _verbose: false,
         _version: false,
         _help: false
       }

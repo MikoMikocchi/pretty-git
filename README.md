@@ -142,12 +142,15 @@ Key options:
 * **--no-color** Disable colors in console
 * **--theme** `basic|bright|mono` — console theme (default `basic`; `mono` forces monochrome)
 * **--metric** `bytes|files|loc` — metric for `languages` report (default `bytes`)
+* **--verbose** Print debug information (effective git command, filters)
 
 Examples with multiple values:
 
 ```bash
-# Multiple branches
+# Multiple branches (treated as explicit revisions)
 pretty-git summary . --branch main --branch develop
+## This is equivalent to:
+## git log main develop -- ...
 
 # Filter authors (include/exclude)
 pretty-git authors . --author alice@example.com --exclude-author bot@company
@@ -505,6 +508,7 @@ Primary targets — macOS/Linux. Windows is supported best‑effort:
 Typical issues and solutions:
 
 * **Unknown report/format** — check the first argument and `--format`.
+* **Debugging** — add `--verbose` to see the effective `git log` command and applied filters.
 * **Invalid date format** — use ISO8601 or `YYYY-MM-DD` (e.g., `2025-01-31` or `2025-01-31T12:00:00Z`).
 * **Git not available** — ensure `git` is installed and in the `PATH`.
 * **Empty result** — check your filters (`--since/--until`, `--branch`, `--path`); your selection might be too narrow.

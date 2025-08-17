@@ -147,11 +147,29 @@ RSpec.describe PrettyGit::CLI do
     txt = out.string
     expect(txt).to include('--theme')
     expect(txt).to include('--metric')
+    expect(txt).to include('--verbose')
   end
 
   it 'returns 1 when --metric is used with non-languages report' do
     code = parse_and_run(['authors', '--metric', 'bytes'])
     expect(code).to eq(1)
     expect(err.string).to include("--metric is only supported for 'languages' report")
+  end
+
+  it 'passes --verbose to Filters' do
+    app_double = instance_double(PrettyGit::App)
+    allow(PrettyGit::App).to receive(:new).and_return(app_double)
+    captured_filters = nil
+    allow(app_double).to receive(:run) do |_report, filters, out:, err:|
+      _ = out
+      _ = err
+      captured_filters = filters
+      0
+    end
+
+    code = parse_and_run(['summary', '--verbose'])
+    expect(code).to eq(0)
+    expect(captured_filters).to be_a(PrettyGit::Filters)
+    expect(captured_filters.verbose).to be true
   end
 end

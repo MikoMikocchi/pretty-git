@@ -1,17 +1,20 @@
 # frozen_string_literal: true
 
 require 'optparse'
+require 'fileutils'
 require_relative 'filters'
 require_relative 'app'
+require_relative 'constants'
 
 module PrettyGit
   # Helpers extracted from `PrettyGit::CLI` to keep the CLI class small
   # and RuboCop-compliant. Provides parser configuration and execution utilities.
   # rubocop:disable Metrics/ModuleLength
   module CLIHelpers
-    REPORTS = %w[summary activity authors files heatmap languages hotspots churn ownership].freeze
-    FORMATS = %w[console json csv md yaml xml].freeze
-    METRICS = %w[bytes files loc].freeze
+    REPORTS = PrettyGit::Constants::REPORTS
+    FORMATS = PrettyGit::Constants::FORMATS
+    METRICS = PrettyGit::Constants::METRICS
+    THEMES  = PrettyGit::Constants::THEMES
 
     module_function
 
@@ -60,6 +63,7 @@ module PrettyGit
     def add_misc_options(opts, options)
       opts.on('--version', 'Show version') { options[:_version] = true }
       opts.on('--help', 'Show help') { options[:_help] = true }
+      opts.on('--verbose', 'Verbose output (debug)') { options[:_verbose] = true }
     end
 
     def parse_limit(str)
@@ -75,7 +79,7 @@ module PrettyGit
       code = handle_version_help(options, parser, out)
       return code unless code.nil?
 
-      base_ok = valid_report?(options[:report]) && valid_theme?(options[:theme]) && valid_metric?(options[:metric])
+      base_ok = valid_base?(options)
       conflicts_ok = validate_conflicts(options, err)
       return nil if base_ok && conflicts_ok
 
@@ -96,19 +100,47 @@ module PrettyGit
     end
 
     def valid_report?(report) = REPORTS.include?(report)
-    def valid_theme?(theme) = %w[basic bright mono].include?(theme)
+    def valid_theme?(theme) = THEMES.include?(theme)
+    def valid_format?(fmt) = FORMATS.include?(fmt)
+
+    def valid_base?(options)
+      valid_report?(options[:report]) &&
+        valid_theme?(options[:theme]) &&
+        valid_metric?(options[:metric]) &&
+        valid_format?(options[:format])
+    end
 
     def valid_metric?(metric)
       metric.nil? || METRICS.include?(metric)
     end
 
     def print_validation_errors(options, err)
-      supported = REPORTS.join(', ')
-      unless valid_report?(options[:report])
-        err.puts "Unknown report: #{options[:report]}."
-        err.puts "Supported: #{supported}"
-      end
-      err.puts "Unknown theme: #{options[:theme]}. Supported: basic, bright, mono" unless valid_theme?(options[:theme])
+      print_report_error(options, err)
+      print_theme_error(options, err)
+      print_format_error(options, err)
+      print_metric_error(options, err)
+    end
+
+    def print_report_error(options, err)
+      return if valid_report?(options[:report])
+
+      err.puts "Unknown report: #{options[:report]}."
+      err.puts "Supported: #{REPORTS.join(', ')}"
+    end
+
+    def print_theme_error(options, err)
+      return if valid_theme?(options[:theme])
+
+      err.puts "Unknown theme: #{options[:theme]}. Supported: #{THEMES.join(', ')}"
+    end
+
+    def print_format_error(options, err)
+      return if valid_format?(options[:format])
+
+      err.puts "Unknown format: #{options[:format]}. Supported: #{FORMATS.join(', ')}"
+    end
+
+    def print_metric_error(options, err)
       return if valid_metric?(options[:metric])
 
       err.puts "Unknown metric: #{options[:metric]}. Supported: #{METRICS.join(', ')}"
@@ -130,7 +162,7 @@ module PrettyGit
         repo_path: options[:repo],
         branches: options[:branches],
         since: options[:since],
-        until: options[:until],
+        until_at: options[:until],
         authors: options[:authors],
         exclude_authors: options[:exclude_authors],
         paths: options[:paths],
@@ -141,14 +173,25 @@ module PrettyGit
         format: options[:format],
         out: options[:out],
         no_color: options[:no_color],
-        theme: options[:theme]
+        theme: options[:theme],
+        verbose: options[:_verbose]
       )
     end
 
     def execute(report, filters, options, out, err)
       if options[:out]
-        File.open(options[:out], 'w') do |f|
-          return PrettyGit::App.new.run(report, filters, out: f, err: err)
+        begin
+          dir = File.dirname(options[:out])
+          FileUtils.mkdir_p(dir) unless dir.nil? || dir == '.'
+          File.open(options[:out], 'w') do |f|
+            return PrettyGit::App.new.run(report, filters, out: f, err: err)
+          end
+        rescue Errno::EACCES
+          err.puts "Cannot write to: #{options[:out]} (permission denied)"
+          return 2
+        rescue Errno::ENOENT
+          err.puts "Cannot write to: #{options[:out]} (directory not found)"
+          return 2
         end
       end
 

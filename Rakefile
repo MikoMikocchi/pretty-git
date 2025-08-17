@@ -117,7 +117,7 @@ namespace :release do
       files = Dir.chdir(unpacked_root) { Dir['**/*'].select { |p| File.file?(File.join(unpacked_root, p)) } }
 
       disallowed = [
-        %r{^(specs|docs)/},
+        %r{^(spec|docs)/},
         %r{^\.github/},
         /^\.mdlrc$/,
         /^\.markdownlint\.yml$/,

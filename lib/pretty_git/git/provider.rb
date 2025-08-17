@@ -21,6 +21,7 @@ module PrettyGit
       def each_commit
         Enumerator.new do |yld|
           cmd = build_git_command
+          warn("[pretty-git] git cmd: #{cmd.join(' ')} (cwd=#{@filters.repo_path})") if @filters.verbose
           Open3.popen3(*cmd, chdir: @filters.repo_path) do |_stdin, stdout, stderr, wait_thr|
             current = nil
             stdout.each_line do |line|
@@ -73,10 +74,6 @@ module PrettyGit
         yld << commit
       end
 
-      def record_separator?(line)
-        line == SEP_RECORD
-      end
-
       def start_commit_from_header(line)
         sha, author_name, author_email, authored_at, subject = line.split(SEP_FIELD, 5)
         return nil unless subject
@@ -121,7 +118,8 @@ module PrettyGit
 
       def add_author_and_branch_filters(args)
         @filters.authors&.each { |a| args << "--author=#{a}" }
-        @filters.branches&.each { |b| args << "--branches=#{b}" }
+        # Treat branches as explicit revisions to include
+        @filters.branches&.each { |b| args << b }
       end
 
       # rubocop:disable Metrics/AbcSize
