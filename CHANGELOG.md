@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
 ## [Unreleased]
-_No unreleased changes yet._
+### Added
+- Docs: `docs/testing.md` про golden‑workflow, обновление/валидацию снапшотов; ссылки из `README.md`, `README.ru.md`, `CONTRIBUTING.md`.
+- Tests: инвариантные проверки детерминизма для YAML/XML рендереров (стабильный вывод при разном порядке входа).
+
+### Changed
+- Completions: обновлены bash/zsh автодополнения — добавлены короткие флаги `-f`/`-o`/`-l`, значения для `--time-bucket` (`day|week|month`), автодополнение пути репозитория как второго позиционного аргумента.
 
 ## [0.1.5] - 2025-08-17
 ### Added
