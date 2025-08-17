@@ -57,7 +57,7 @@ module PrettyGit
 
         additions = current[:files].sum(&:additions)
         deletions = current[:files].sum(&:deletions)
-        yld << Types::Commit.new(
+        commit = Types::Commit.new(
           sha: current[:sha],
           author_name: current[:author_name],
           author_email: current[:author_email],
@@ -67,6 +67,9 @@ module PrettyGit
           deletions: deletions,
           files: current[:files]
         )
+        return if exclude_author?(commit.author_name, commit.author_email)
+
+        yld << commit
       end
 
       def record_separator?(line)
@@ -122,10 +125,33 @@ module PrettyGit
 
       def add_path_filters(args)
         path_args = Array(@filters.paths).compact
-        return if path_args.empty?
+        exclude_args = Array(@filters.exclude_paths).compact
+
+        # Nothing to filter by
+        return if path_args.empty? && exclude_args.empty?
 
         args << '--'
-        args.concat(path_args)
+
+        # If only excludes provided, include all paths first
+        args << '.' if path_args.empty? && !exclude_args.empty?
+
+        # Include patterns as-is
+        args.concat(path_args) unless path_args.empty?
+
+        # Exclude patterns via git pathspec magic with glob
+        exclude_args.each do |pat|
+          args << ":(exclude,glob)#{pat}"
+        end
+      end
+
+      def exclude_author?(name, email)
+        patterns = Array(@filters.exclude_authors).compact
+        return false if patterns.empty?
+
+        patterns.any? do |pat|
+          pn = pat.to_s
+          name&.downcase&.include?(pn.downcase) || email&.downcase&.include?(pn.downcase)
+        end
       end
     end
   end
