@@ -46,6 +46,9 @@ module PrettyGit
         return 1
       end
 
+      # REPO positional arg (after REPORT), if still present and not an option
+      options[:repo] = argv.shift if argv[0] && argv[0] !~ /^-/
+
       exit_code = CLIHelpers.validate_and_maybe_exit(options, parser, out, err)
       return exit_code if exit_code
 

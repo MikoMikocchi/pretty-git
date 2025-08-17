@@ -16,7 +16,7 @@ module PrettyGit
     module_function
 
     def configure_parser(opts, options)
-      opts.banner = 'Usage: pretty-git [REPORT] [options]'
+      opts.banner = 'Usage: pretty-git [REPORT] [REPO] [options]'
       add_repo_options(opts, options)
       add_time_author_options(opts, options)
       add_path_limit_options(opts, options)
