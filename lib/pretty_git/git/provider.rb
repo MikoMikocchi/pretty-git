@@ -4,6 +4,7 @@ require 'open3'
 require 'time'
 require_relative '../types'
 require_relative '../logger'
+require_relative '../utils/path_utils'
 
 module PrettyGit
   module Git
@@ -126,10 +127,9 @@ module PrettyGit
         @filters.branches&.each { |b| args << b }
       end
 
-      # rubocop:disable Metrics/AbcSize
       def add_path_filters(args)
-        path_args = Array(@filters.paths).compact
-        exclude_args = Array(@filters.exclude_paths).compact
+        path_args = PrettyGit::Utils::PathUtils.normalize_globs(@filters.paths)
+        exclude_args = PrettyGit::Utils::PathUtils.normalize_globs(@filters.exclude_paths)
 
         # Nothing to filter by
         return if path_args.empty? && exclude_args.empty?
@@ -139,15 +139,14 @@ module PrettyGit
         # If only excludes provided, include all paths first
         args << '.' if path_args.empty? && !exclude_args.empty?
 
-        # Include patterns as-is
+        # Include patterns (normalized)
         args.concat(path_args) unless path_args.empty?
 
-        # Exclude patterns via git pathspec magic with glob
+        # Exclude patterns via git pathspec magic with glob (normalized)
         exclude_args.each do |pat|
           args << ":(exclude,glob)#{pat}"
         end
       end
-      # rubocop:enable Metrics/AbcSize
 
       # rubocop:disable Metrics/CyclomaticComplexity
       def exclude_author?(name, email)

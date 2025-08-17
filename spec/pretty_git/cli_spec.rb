@@ -62,6 +62,20 @@ RSpec.describe PrettyGit::CLI do
     expect(out.string).to include('Usage: pretty-git')
   end
 
+  it 'includes structured sections and Examples in --help' do
+    code = parse_and_run(['--help'])
+    expect(code).to eq(0)
+    txt = out.string
+    expect(txt).to include('Repository and branch:')
+    expect(txt).to include('Time, authors, and bucketing:')
+    expect(txt).to include('Paths and limits:')
+    expect(txt).to include('Format and output:')
+    expect(txt).to include('Metrics (languages report only):')
+    expect(txt).to include('Other:')
+    expect(txt).to include('Examples:')
+    expect(txt).to include('pretty-git summary . --format json')
+  end
+
   it 'returns 1 and prints error for unknown report' do
     code = parse_and_run(['unknown-report'])
     expect(code).to eq(1)

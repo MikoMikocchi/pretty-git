@@ -18,15 +18,43 @@ module PrettyGit
 
     module_function
 
+    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     def configure_parser(opts, options)
-      opts.banner = 'Usage: pretty-git [REPORT] [REPO] [options]'
+      opts.banner = <<~BANNER
+        Usage: pretty-git [REPORT] [REPO] [options]
+
+        Reports: #{REPORTS.join(', ')}
+        Formats: #{FORMATS.join(', ')}
+        Themes:  #{THEMES.join(', ')}
+      BANNER
+      opts.separator('')
+      opts.separator('Repository and branch:')
       add_repo_options(opts, options)
+      opts.separator('')
+      opts.separator('Time, authors, and bucketing:')
       add_time_author_options(opts, options)
+      opts.separator('')
+      opts.separator('Paths and limits:')
       add_path_limit_options(opts, options)
+      opts.separator('')
+      opts.separator('Format and output:')
       add_format_output_options(opts, options)
+      opts.separator('')
+      opts.separator('Metrics (languages report only):')
       add_metric_options(opts, options)
+      opts.separator('')
+      opts.separator('Other:')
       add_misc_options(opts, options)
+      opts.separator('')
+      opts.separator('Examples:')
+      opts.separator('  $ pretty-git summary . --format json')
+      opts.separator('  $ pretty-git authors ~/repo --since 2025-01-01 --limit 20')
+      opts.separator('  $ pretty-git files . --path app/**/*.rb --exclude-path spec/**')
+      opts.separator('  $ pretty-git activity . --time-bucket week --out out/report.md --format md')
+      opts.separator('  $ pretty-git languages . --metric loc --format csv > langs.csv')
+      opts.separator('  $ pretty-git hotspots . --branch main --limit 50 --format yaml')
     end
+    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
     def add_repo_options(opts, options)
       opts.on('--repo PATH', 'Path to git repository (default: .)') { |val| options[:repo] = val }
@@ -50,8 +78,14 @@ module PrettyGit
     def add_format_output_options(opts, options)
       opts.on('--format FMT', 'console|json|csv|md|yaml|xml') { |val| options[:format] = val }
       opts.on('--out FILE', 'Output file path') { |val| options[:out] = val }
-      opts.on('--no-color', 'Disable colors in console output') { options[:no_color] = true }
-      opts.on('--theme NAME', 'console color theme: basic|bright|mono') { |val| options[:theme] = val }
+      opts.on('--no-color', 'Disable colors in console output') do
+        options[:no_color] = true
+        options[:_no_color_provided] = true
+      end
+      opts.on('--theme NAME', 'console color theme: basic|bright|mono') do |val|
+        options[:theme] = val
+        options[:_theme_provided] = true
+      end
     end
 
     def add_metric_options(opts, options)
@@ -82,7 +116,9 @@ module PrettyGit
       base_ok = valid_base?(options)
       conflicts_ok = validate_conflicts(options, err)
       if base_ok && conflicts_ok
-        warn_ignores(options, err)
+        early = warn_ignores(options, err)
+        return 0 if early == :early_exit
+
         return nil
       end
 
@@ -161,18 +197,36 @@ module PrettyGit
     end
 
     # Print non-fatal warnings for flags that won't have effect with current options
+    # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     def warn_ignores(options, err)
       return unless err
 
       fmt = options[:format]
-      if fmt && fmt != 'console'
-        if options[:theme]
-          err.puts "Warning: --theme has no effect when --format=#{fmt}"
-        end
-        if options[:no_color]
-          err.puts "Warning: --no-color has no effect when --format=#{fmt}"
-        end
-      end
+      return unless fmt && fmt != 'console'
+
+      err.puts "Warning: --theme has no effect when --format=#{fmt}" if options[:theme]
+      err.puts "Warning: --no-color has no effect when --format=#{fmt}" if options[:no_color]
+
+      # Exit early only if user explicitly provided these console-only flags
+      # AND no other significant options that warrant running the app were provided.
+      return unless options[:_theme_provided] || options[:_no_color_provided]
+
+      significant = significant_options?(options)
+      :early_exit unless significant
+    end
+    # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+
+    def significant_options?(options)
+      return true if options[:out]
+      return true if options[:metric]
+      return true if options[:time_bucket]
+      return true if options[:limit] && options[:limit] != 10
+
+      any_collection_present?(options, %i[branches authors exclude_authors paths exclude_paths])
+    end
+
+    def any_collection_present?(options, keys)
+      keys.any? { |k| options[k]&.any? }
     end
 
     def build_filters(options)

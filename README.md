@@ -562,10 +562,13 @@ jobs:
 ```
 
 ## 🪟 Windows Notes
-Primary targets — macOS/Linux. Windows is supported best‑effort:
-* Running via Git Bash/WSL is OK
-* Colors can be disabled by `--no-color`
-* Carefully quote arguments when working with paths
+Primary targets — macOS/Linux. Windows is supported best‑effort. See detailed notes in [docs/windows.md](docs/windows.md).
+
+Highlights:
+* Running via Git Bash/WSL is recommended.
+* CRLF output from git is handled by the parser; exports use UTF‑8 with LF.
+* Path filters are normalized to Unicode NFC when available; otherwise pass‑through.
+* Colors can be disabled by `--no-color` or `--theme mono`.
 
 ## 🩺 Diagnostics and Errors
 Typical issues and solutions:

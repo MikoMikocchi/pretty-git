@@ -4,6 +4,7 @@ require 'time'
 
 module PrettyGit
   module Utils
+    # Utilities for time parsing and ISO8601 normalization used by filters.
     module TimeUtils
       module_function
 
@@ -13,15 +14,21 @@ module PrettyGit
       def to_utc_iso8601(val)
         return nil if val.nil? || val.to_s.strip.empty?
 
-        if val.is_a?(String) && date_only?(val)
-          y, m, d = val.split('-').map(&:to_i)
-          t = Time.new(y, m, d, 0, 0, 0, '+00:00')
-        else
-          t = val.is_a?(Time) ? val : Time.parse(val.to_s)
-        end
-        t.utc.iso8601
+        parse_to_time(val).utc.iso8601
       rescue ArgumentError
         raise ArgumentError, "Invalid datetime: #{val} (expected ISO8601 or YYYY-MM-DD)"
+      end
+
+      def parse_to_time(val)
+        return val if val.is_a?(Time)
+        return parse_date_only(val) if val.is_a?(String) && date_only?(val)
+
+        Time.parse(val.to_s)
+      end
+
+      def parse_date_only(str)
+        y, m, d = str.split('-').map(&:to_i)
+        Time.new(y, m, d, 0, 0, 0, '+00:00')
       end
 
       def date_only?(str)

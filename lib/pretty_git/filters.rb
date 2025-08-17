@@ -68,8 +68,5 @@ module PrettyGit
     def until_iso8601
       PrettyGit::Utils::TimeUtils.to_utc_iso8601(self[:until_at])
     end
-
-    private
-    
   end
 end

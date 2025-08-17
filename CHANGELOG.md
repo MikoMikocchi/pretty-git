@@ -5,10 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
 ## [Unreleased]
+_No unreleased changes yet._
+
+## [0.1.5] - 2025-08-17
 ### Added
-- README: expanded Filters documentation (branches, authors, paths, time semantics, verbose diagnostics), schemas/examples pointers, performance and CI usage.
+- CLI: warn to stderr when `--theme`/`--no-color` are used with non-console `--format` values.
+- Docs: expanded Filters documentation (branches, authors, paths, time semantics, verbose diagnostics), schemas/examples pointers, performance and CI usage.
+- Tests: unit tests for `PrettyGit::Utils::TimeUtils`.
 
 ### Changed
+- Internals: extracted time parsing/normalization to `PrettyGit::Utils::TimeUtils` and centralized verbose logging via `PrettyGit::Logger`. `Git::Provider` routes verbose messages through the centralized logger (stderr).
 - Verbose mode: documentation clarified to note that diagnostics are printed to stderr for easier CI parsing.
 
 ### Deprecated

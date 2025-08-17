@@ -68,6 +68,27 @@ RSpec.describe PrettyGit::Git::Provider do
       expect(c.files.map(&:path)).to contain_exactly('README.md', 'lib/file.rb')
     end
 
+    it 'parses commits with CRLF line endings' do
+      header = [
+        'feeddeed', 'Jane Roe', 'jane@example.com', '2025-02-03T04:05:06Z', 'Win line endings'
+      ].join(us)
+      num1 = ['3', '1', 'docs/readme.txt'].join("\t")
+      lines = [header, num1, rs]
+      stdout = StringIO.new("#{lines.join("\r\n")}\r\n")
+
+      allow(Open3).to receive(:popen3).and_yield(
+        instance_double(IO), stdout, instance_double(IO, read: ''), wait_thr_success
+      )
+
+      commits = described_class.new(filters).each_commit.to_a
+      expect(commits.size).to eq(1)
+      c = commits.first
+      expect(c.sha).to eq('feeddeed')
+      expect(c.author_name).to eq('Jane Roe')
+      expect(c.authored_at).to eq('2025-02-03T04:05:06Z')
+      expect(c.files.map(&:path)).to include('docs/readme.txt')
+    end
+
     it 'passes filters as git arguments' do
       stdout = stdout_with_commits([rs])
       captured_cmd = nil
