@@ -159,7 +159,7 @@ end
 namespace :perf do
   desc 'Run perf baseline. Usage: rake perf:baseline REPO=path REPORTS="summary,files" FORMAT=console ITERS=3'
   task :baseline do
-    repo = ENV['REPO'] || '.'
+    repo = File.expand_path(ENV['REPO'] || '.', Dir.pwd)
     reports = ENV['REPORTS'] || 'summary,files,authors,languages,activity,heatmap,hotspots,churn,ownership'
     format = ENV['FORMAT'] || 'console'
     iters = (ENV['ITERS'] || '3').to_i

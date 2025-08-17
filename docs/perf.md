@@ -54,3 +54,17 @@ rake perf:baseline REPO=. REPORTS="summary,files" FORMAT=json ITERS=2 -- --alloc
 - __Сводка__:
   - `summary`: min=0.21s avg=0.21s max=0.21s, RSS≈464 KB; allocs(min/avg/max)=77/98/118
   - `files`:   min=0.21s avg=0.21s max=0.21s, RSS≈448 KB; allocs(min/avg/max)=77/77/77
+
+### 2025-08-18 01:07 (+03:00)
+
+- __Параметры__: `REPO=~/TypeScript-main` `REPORTS="summary,files,authors,languages,activity,heatmap,hotspots,churn,ownership"` `FORMAT=json` `ITERS=3` `ALLOCS=1`
+- __Сводка__:
+  - `summary`:   min=0.17s avg=0.17s max=0.18s, RSS≈464 KB;  allocs(min/avg/max)=83/99/130
+  - `files`:     min=0.16s avg=0.16s max=0.16s, RSS≈5344 KB; allocs(min/avg/max)=83/83/83
+  - `authors`:   min=0.16s avg=0.16s max=0.16s, RSS≈448 KB;  allocs(min/avg/max)=83/83/83
+  - `languages`: min=5.56s avg=5.83s max=6.03s, RSS≈1312 KB; allocs(min/avg/max)=77/77/77
+  - `activity`:  min=0.16s avg=0.19s max=0.25s, RSS≈624 KB;  allocs(min/avg/max)=83/83/83
+  - `heatmap`:   min=0.16s avg=0.16s max=0.17s, RSS≈480 KB;  allocs(min/avg/max)=83/83/83
+  - `hotspots`:  min=0.16s avg=0.16s max=0.16s, RSS≈1312 KB; allocs(min/avg/max)=83/83/83
+  - `churn`:     min=0.16s avg=0.16s max=0.16s, RSS≈560 KB;  allocs(min/avg/max)=83/83/83
+  - `ownership`: min=0.16s avg=0.16s max=0.17s, RSS≈448 KB;  allocs(min/avg/max)=83/83/83
