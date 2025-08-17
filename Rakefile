@@ -165,12 +165,16 @@ namespace :perf do
     iters = (ENV['ITERS'] || '3').to_i
     since = ENV.fetch('SINCE', nil)
     until_at = ENV.fetch('UNTIL', nil)
+    allocs = ENV.fetch('ALLOCS', nil)
+    extra = ENV.fetch('PERF_ARGS', nil)
 
     ruby = RbConfig.ruby
     script = File.expand_path(File.join(__dir__, 'scripts', 'perf_baseline.rb'))
     args = [ruby, script, '--repo', repo, '--reports', reports, '--format', format, '--iters', iters.to_s]
     args += ['--since', since] if since
     args += ['--until', until_at] if until_at
+    args << '--allocs' if allocs && allocs != '0' && allocs.downcase != 'false'
+    args += Shellwords.split(extra) if extra && !extra.strip.empty?
 
     sh Shellwords.shelljoin(args)
   end

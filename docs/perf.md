@@ -18,6 +18,7 @@ rake perf:baseline REPO=/path/to/repo REPORTS="summary,files,authors,languages,a
 - `FORMAT`: формат вывода (`console|json|csv|md|yaml|xml`).
 - `ITERS`: число итераций на отчёт (по умолчанию: 3).
 - `SINCE`/`UNTIL`: опциональные временные фильтры, прокидываются в CLI.
+- `--allocs`: измерять число аллокаций за итерацию (через `GC.stat`, best‑effort).
 
 ## Скрипт
 
@@ -25,6 +26,12 @@ rake perf:baseline REPO=/path/to/repo REPORTS="summary,files,authors,languages,a
 - Вызывает напрямую CLI `bin/pretty-git` с заданным отчётом и параметрами.
 - Использует `Process.clock_gettime(MONOTONIC)` для замера времени.
 - Печатает время по итерациям и сводку (min/avg/max и пиковый RSS, если доступен).
+
+Пример с аллокациями:
+
+```
+rake perf:baseline REPO=. REPORTS="summary,files" FORMAT=json ITERS=2 -- --allocs
+```
 
 ## Заметки и советы
 - Для стабильных измерений закройте фоновые приложения и работайте от сети.
@@ -40,3 +47,10 @@ rake perf:baseline REPO=/path/to/repo REPORTS="summary,files,authors,languages,a
 - __Сводка__:
   - `summary`: min=0.15s avg=0.30s max=0.45s, RSS≈448 KB
   - `files`:   min=0.15s avg=0.16s max=0.16s, RSS≈464 KB
+
+### 2025-08-18 00:54 (+03:00)
+
+- __Параметры__: `REPO=.` `REPORTS="summary,files"` `FORMAT=json` `ITERS=2` `ALLOCS=1`
+- __Сводка__:
+  - `summary`: min=0.21s avg=0.21s max=0.21s, RSS≈464 KB; allocs(min/avg/max)=77/98/118
+  - `files`:   min=0.21s avg=0.21s max=0.21s, RSS≈448 KB; allocs(min/avg/max)=77/77/77
