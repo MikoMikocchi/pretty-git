@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
 ## [Unreleased]
- 
+### Added
+- README: expanded Filters documentation (branches, authors, paths, time semantics, verbose diagnostics), schemas/examples pointers, performance and CI usage.
+
+### Changed
+- Verbose mode: documentation clarified to note that diagnostics are printed to stderr for easier CI parsing.
+
+### Deprecated
+- Filters: legacy `:until` keyword in `PrettyGit::Filters` initialization is accepted for backward compatibility and emits a deprecation warning; use `:until_at` instead.
+
+### Fixed
+- Filters: allow initialization via a single Hash argument (legacy call sites) while preserving `Struct` keyword semantics.
 
 ## [0.1.4] - 2025-08-17
 ### Added

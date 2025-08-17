@@ -25,23 +25,18 @@ module PrettyGit
     # Backward-compat: allow initializing with `until:` keyword by remapping to :until_at
     # Preserve Struct keyword_init behavior by overriding initialize instead of .new
     def initialize(*args, **kwargs)
-      # Support calling with a single Hash as positional arg (older call sites)
-      if (kwargs.nil? || kwargs.empty?) && args.length == 1 && args.first.is_a?(Hash)
-        kwargs = args.first
-        args = []
-      end
-
+      # Accept a single Hash positional argument for backward compatibility
+      kwargs = args.first if (kwargs.nil? || kwargs.empty?) && args.length == 1 && args.first.is_a?(Hash)
       kwargs ||= {}
+
       if kwargs.key?(:until)
+        Kernel.warn('[pretty-git] DEPRECATION: Filters initialized with :until. Use :until_at instead.')
         kwargs = kwargs.dup
         kwargs[:until_at] = kwargs.delete(:until)
       end
 
-      if kwargs.empty?
-        super(*args)
-      else
-        super(**kwargs)
-      end
+      # Keyword-init struct: prefer keyword form consistently to keep initialize simple
+      super(**kwargs)
     end
 
     # Backward-compat: support filters.until and filters.until=
@@ -56,13 +51,14 @@ module PrettyGit
     # Backward-compat for hash-style access used in older specs
     def [](key)
       key = :until_at if key == :until
-      super(key)
+      super
     end
 
     def []=(key, value)
       key = :until_at if key == :until
-      super(key, value)
+      super
     end
+
     def since_iso8601
       time_to_iso8601(since)
     end

@@ -58,6 +58,13 @@ Generator of rich reports for a local Git repository: summary, activity, authors
 * **Exports**: `console`, `json`, `csv`, `md`, `yaml`, `xml`.
 * **Output**: to stdout or file via `--out`.
 
+## ❓ Why Pretty Git
+* **One tool, many views**: activity, authorship, hotspots, languages, ownership — consistent UX and outputs.
+* **Deterministic results**: stable sorting and formatting make it reliable for CI and diffs.
+* **Format-first**: JSON/CSV/Markdown/YAML/XML out of the box with strict and documented rules.
+* **Fast enough for daily use**: streams `git log` and aggregates in-memory; tips below for large repos.
+* **Safe defaults**: sensible path and binary ignores for the `languages` report; colorized console output with themes.
+
 ## ⚙️ Requirements
 * **Ruby**: >= 3.4 (recommended 3.4.x)
 * **Git**: installed and available in `PATH`
@@ -160,7 +167,30 @@ pretty-git files . --path app,lib --exclude-path vendor,node_modules
 ```
 
 ### Filters
-Filters apply at commit fetch and later aggregation. Date format: ISO8601 or `YYYY-MM-DD`. If timezone is omitted — your local zone is assumed; output timestamps are normalized to UTC.
+Filters apply at commit fetch and later aggregation. Below — exact semantics and tips.
+
+#### Branches / revisions
+* `--branch BRANCH` may be provided multiple times.
+* Multiple branches are treated as explicit revisions to `git log` (no implicit merge-base range). Example: `--branch main --branch develop` → `git log main develop -- ...`.
+* If no branches are specified, the repository’s current `HEAD` is used.
+
+#### Authors
+* `--author` and `--exclude-author` accept name or email substrings (case-insensitive match by `git log`).
+* Multiple values may be provided by repeating the option.
+
+#### Paths
+* `--path` and `--exclude-path` accept comma-separated values or repeated options.
+* Globs are supported by git pathspec. Excludes are translated to `:(exclude)pattern` and applied consistently.
+* When only excludes are present, `.` is included to ensure the pathspec is valid (mirrors tests in `spec/pretty_git/git/provider_spec.rb`).
+
+#### Time period
+* `--since` / `--until`: ISO8601 (e.g. `2025-01-31T12:00:00Z`) or `YYYY-MM-DD`.
+* Date-only values are interpreted as UTC midnight to avoid timezone drift in different environments.
+* Time values are normalized to UTC in outputs.
+
+#### Verbose diagnostics
+* `--verbose` prints the effective `git log` command and active filters to stderr.
+* Useful for debugging filters, CI logs, or when reproducing results locally.
 
 ### Output format
 Set via `--format`. For file formats it’s recommended to use `--out`.
@@ -400,6 +430,13 @@ _Example terminal output (theme: basic)._
   {"report":"summary","generated_at":"2025-01-31T00:00:00Z","totals":{"commits":123}}
   ```
 
+## 🧾 Schemas and Examples
+Machine-readable examples and schemas live under `docs/export_schemas/` and `docs/examples/`.
+
+* **Schemas**: see `docs/export_schemas/README.md` for JSON and XML schema notes.
+* **Examples**: example payloads for JSON/XML for each report under `docs/examples/`.
+* Intended use: validation in CI, contract documentation, and integration tests.
+
 ### CSV
 * **Structure**: flat table, first line is header.
 * **Encoding**: UTF‑8 without BOM.
@@ -497,6 +534,32 @@ These lists mirror the implementation in `lib/pretty_git/analytics/languages.rb`
 
 ## 🔁 Determinism and Sorting
 Output is deterministic given the same input. Sorting for files/authors: by changes (desc), then by commits (desc), then by path/name (asc). Limits are applied after sorting; `all` or `0` means no limit.
+
+## ⚡ Performance Tips
+* Prefer narrowing by `--path`/`--exclude-path` and `--since/--until` on large repositories.
+* Use multiple `--branch` only when you explicitly want to include several heads; otherwise rely on current `HEAD`.
+* For CI, cache the repository and fetch shallow history if full history is unnecessary for your report.
+
+## 🤖 CI Usage
+Examples for common pipelines:
+
+```yaml
+# GitHub Actions (excerpt)
+jobs:
+  reports:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+      - run: gem install pretty-git
+      - run: pretty-git authors . --format json --out authors.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: authors-report
+          path: authors.json
+```
 
 ## 🪟 Windows Notes
 Primary targets — macOS/Linux. Windows is supported best‑effort:

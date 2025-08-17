@@ -36,4 +36,23 @@ RSpec.describe PrettyGit::Filters do
       expect { f.since_iso8601 }.to raise_error(ArgumentError, /Invalid datetime/)
     end
   end
+
+  describe 'initialization compatibility' do
+    it 'accepts a single Hash positional argument' do
+      f = described_class.new({ limit: 5, format: 'json' })
+      expect(f.limit).to eq(5)
+      expect(f.format).to eq('json')
+    end
+
+    it 'remaps legacy :until to :until_at and emits deprecation to stderr' do
+      expect do
+        f = described_class.new(until: '2025-01-02')
+        expect(f.until).to eq('2025-01-02')
+        expect(f[:until]).to eq('2025-01-02')
+        expect(f[:until_at]).to eq('2025-01-02')
+        f.until = '2025-01-03'
+        expect(f[:until_at]).to eq('2025-01-03')
+      end.to output(/DEPRECATION: Filters initialized with :until/).to_stderr
+    end
+  end
 end
