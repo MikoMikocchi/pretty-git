@@ -83,3 +83,25 @@ rake perf:baseline REPO=. REPORTS="languages" FORMAT=json ITERS=1 PERF_ARGS="--p
   - `hotspots`:  min=0.16s avg=0.16s max=0.16s, RSS≈1312 KB; allocs(min/avg/max)=83/83/83
   - `churn`:     min=0.16s avg=0.16s max=0.16s, RSS≈560 KB;  allocs(min/avg/max)=83/83/83
   - `ownership`: min=0.16s avg=0.16s max=0.17s, RSS≈448 KB;  allocs(min/avg/max)=83/83/83
+
+### 2025-08-18 01:25 (+03:00) — Профилирование (PG_PROF) на TypeScript-main
+
+- Параметры: `REPO=~/TypeScript-main` `REPORTS="summary,files,authors,languages,activity,heatmap,hotspots,churn,ownership"` `FORMAT=json` `ITERS=3` `--prof` `--allocs`
+- Из `perf_profile_languages_iterNN.log`:
+  - files≈39601, время по итерациям: 4.848s, 4.759s, 4.791s (avg≈4.80–4.95s)
+  - Вывод `[pg_prof_json]` содержит: `{component:"languages", time_sec: <...>, files:39601, metric:"bytes"}`
+- Наблюдения:
+  - Узкое место — `Analytics::Languages` (скан файлов + подсчёт строк/байт).
+  - В stderr отчётов, использующих git, встречалось: `fatal: your current branch 'master' does not have any commits yet`.
+    - Вероятная причина: состояние ветки после shallow clone. Проверка: `git -C ~/TypeScript-main log -1`.
+    - Если нужно: переключиться на основную ветку и/или углубить историю:
+      - `git -C ~/TypeScript-main switch -c main --track origin/main` (если основная ветка — main)
+      - `git -C ~/TypeScript-main fetch --deepen 100` (или `--unshallow`)
+
+#### 2025-08-18 01:27 (+03:00) — После оптимизаций (Languages)
+
+- Изменения:
+  - В `lib/pretty_git/analytics/languages.rb` строки считаются только при `metric=loc` (для `bytes|files` не читаем файл построчно).
+  - В `each_source_file()` убран `File.expand_path` — работаем с относительными путями.
+- Результат (TypeScript-main, ITERS=1, `--prof`): `languages` ≈ 1.30s (ранее ≈ 4.9–5.0s).
+- Следующий шаг: замерить ITERS=3 и при необходимости оптимизировать include/exclude фильтры.

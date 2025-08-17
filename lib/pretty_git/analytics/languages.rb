@@ -84,8 +84,8 @@ module PrettyGit
         repo = filters.repo_path
         prof = ENV['PG_PROF'] == '1'
         t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC) if prof
-        items = calculate(repo, include_globs: filters.paths, exclude_globs: filters.exclude_paths)
         metric = (filters.metric || 'bytes').to_s
+        items = calculate(repo, include_globs: filters.paths, exclude_globs: filters.exclude_paths, metric: metric)
         totals = compute_totals(items)
         items = add_percents(items, totals, metric)
         items = add_colors(items)
@@ -103,17 +103,17 @@ module PrettyGit
       end
 
       # rubocop:disable Metrics/AbcSize
-      def self.calculate(repo_path, include_globs:, exclude_globs:)
+      def self.calculate(repo_path, include_globs:, exclude_globs:, metric: 'bytes')
         by_lang = Hash.new { |h, k| h[k] = { bytes: 0, files: 0, loc: 0 } }
         Dir.chdir(repo_path) do
-          each_source_file(include_globs, exclude_globs) do |abs_path|
-            basename = File.basename(abs_path)
-            ext = File.extname(abs_path).downcase
+          each_source_file(include_globs, exclude_globs) do |path|
+            basename = File.basename(path)
+            ext = File.extname(path).downcase
             lang = FILENAME_TO_LANG[basename] || EXT_TO_LANG[ext]
             next unless lang
 
-            size = safe_file_size(abs_path)
-            lines = safe_count_lines(abs_path)
+            size = safe_file_size(path)
+            lines = (metric == 'loc') ? safe_count_lines(path) : 0
             agg = by_lang[lang]
             agg[:bytes] += size
             agg[:files] += 1
@@ -130,7 +130,7 @@ module PrettyGit
         files = all.reject { |p| vendor_path?(p) || binary_ext?(p) }
         files = filter_includes(files, include_globs)
         files = filter_excludes(files, exclude_globs)
-        files.each { |rel| yield File.expand_path(rel) }
+        files.each { |rel| yield rel }
       end
 
       def self.safe_file_size(path)
