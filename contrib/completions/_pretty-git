@@ -26,10 +26,14 @@ opts=(
   '--no-color[Disable colors in console output]'
   '--theme[Console color theme]:theme:(basic bright mono)'
   '--metric[Languages metric]:metric:(bytes files loc)'
+  '(-l)--limit[Alias -l]'
+  '(-f)--format[Alias -f]'
+  '(-o)--out[Alias -o]'
 )
 
 _arguments -C \
   '1:report:((summary\:Summary activity\:Activity authors\:Authors files\:Files heatmap\:Heatmap languages\:Languages hotspots\:Hotspots churn\:Churn ownership\:Ownership))' \
+  '2:repo path:_files' \
   '*::options:->opts'
 
 case $state in
