@@ -6,11 +6,11 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 
 ## [Unreleased]
 ### Added
-- Docs: `docs/testing.md` про golden‑workflow, обновление/валидацию снапшотов; ссылки из `README.md`, `README.ru.md`, `CONTRIBUTING.md`.
-- Tests: инвариантные проверки детерминизма для YAML/XML рендереров (стабильный вывод при разном порядке входа).
+- Docs: `docs/testing.md` covering the golden workflow, snapshot update/validation; linked from `README.md`, `README.ru.md`, and `CONTRIBUTING.md`.
+- Tests: determinism invariants for YAML/XML renderers (stable output regardless of input order).
 
 ### Changed
-- Completions: обновлены bash/zsh автодополнения — добавлены короткие флаги `-f`/`-o`/`-l`, значения для `--time-bucket` (`day|week|month`), автодополнение пути репозитория как второго позиционного аргумента.
+- Completions: refreshed bash/zsh completions — added short flags `-f`/`-o`/`-l`, values for `--time-bucket` (`day|week|month`), and repo path completion as the 2nd positional argument.
 
 ## [0.1.5] - 2025-08-17
 ### Added
