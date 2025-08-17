@@ -25,7 +25,6 @@ RSpec.describe PrettyGit::Render::XmlRenderer do
     xb = render('churn', b)
 
     pa = xa.xpath('//report/items/item/path').map(&:text)
-    pb = xb.xpath('//report/items/item/path').map(&:text)
 
     expect(pa).to eq(%w[b.rb a.rb])
     expect(xa.to_xml).to eq(xb.to_xml)

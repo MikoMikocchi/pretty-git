@@ -15,6 +15,29 @@ RSpec.describe PrettyGit::CLI do
     described_class.run(argv.dup, out: out, err: err)
   end
 
+  it 'returns 1 for invalid --theme value' do
+    code = parse_and_run(['authors', '--theme', 'neon'])
+    expect(code).to eq(1)
+    expect(err.string).to include('Unknown theme: neon')
+  end
+
+  it 'passes --theme to Filters' do
+    app_double = instance_double(PrettyGit::App)
+    allow(PrettyGit::App).to receive(:new).and_return(app_double)
+    captured_filters = nil
+    allow(app_double).to receive(:run) do |_report, filters, out:, err:|
+      _ = out
+      _ = err
+      captured_filters = filters
+      0
+    end
+
+    code = parse_and_run(['summary', '--theme', 'bright'])
+    expect(code).to eq(0)
+    expect(captured_filters).to be_a(PrettyGit::Filters)
+    expect(captured_filters.theme).to eq('bright')
+  end
+
   it 'prints version and exits 0 with --version' do
     code = parse_and_run(['--version'])
     expect(code).to eq(0)
@@ -116,5 +139,13 @@ RSpec.describe PrettyGit::CLI do
     expect(content).to include('"ok":true')
   ensure
     FileUtils.rm_f(file_path)
+  end
+
+  it 'lists --theme and --metric in --help' do
+    code = parse_and_run(['--help'])
+    expect(code).to eq(0)
+    txt = out.string
+    expect(txt).to include('--theme')
+    expect(txt).to include('--metric')
   end
 end
