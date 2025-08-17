@@ -3,6 +3,7 @@
 require 'open3'
 require 'time'
 require_relative '../types'
+require_relative '../logger'
 
 module PrettyGit
   module Git
@@ -21,7 +22,10 @@ module PrettyGit
       def each_commit
         Enumerator.new do |yld|
           cmd = build_git_command
-          warn("[pretty-git] git cmd: #{cmd.join(' ')} (cwd=#{@filters.repo_path})") if @filters.verbose
+          PrettyGit::Logger.verbose(
+            "[pretty-git] git cmd: #{cmd.join(' ')} (cwd=#{@filters.repo_path})",
+            @filters.verbose
+          )
           Open3.popen3(*cmd, chdir: @filters.repo_path) do |_stdin, stdout, stderr, wait_thr|
             current = nil
             stdout.each_line do |line|
