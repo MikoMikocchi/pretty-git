@@ -55,3 +55,6 @@ build-iPhoneSimulator/
 /.DS_Store
 /.idea/
 /.vscode/
+
+# Perf profiling logs
+perf_profile_*.log
