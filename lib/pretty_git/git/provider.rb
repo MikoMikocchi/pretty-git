@@ -7,6 +7,7 @@ require_relative '../types'
 module PrettyGit
   module Git
     # Streams commits from git CLI using `git log --numstat` and parses them.
+    # rubocop:disable Metrics/ClassLength
     class Provider
       SEP_RECORD = "\x1E" # record separator
       SEP_FIELD  = "\x1F" # unit separator
@@ -123,6 +124,7 @@ module PrettyGit
         @filters.branches&.each { |b| args << "--branches=#{b}" }
       end
 
+      # rubocop:disable Metrics/AbcSize
       def add_path_filters(args)
         path_args = Array(@filters.paths).compact
         exclude_args = Array(@filters.exclude_paths).compact
@@ -143,7 +145,9 @@ module PrettyGit
           args << ":(exclude,glob)#{pat}"
         end
       end
+      # rubocop:enable Metrics/AbcSize
 
+      # rubocop:disable Metrics/CyclomaticComplexity
       def exclude_author?(name, email)
         patterns = Array(@filters.exclude_authors).compact
         return false if patterns.empty?
@@ -153,6 +157,8 @@ module PrettyGit
           name&.downcase&.include?(pn.downcase) || email&.downcase&.include?(pn.downcase)
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
     end
   end
 end
+# rubocop:enable Metrics/ClassLength

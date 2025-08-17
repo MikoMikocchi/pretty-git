@@ -6,7 +6,6 @@ Gem::Specification.new do |spec|
   version_content = File.read(version_file)
   spec.version = version_content[/VERSION\s*=\s*['\"](.*)['\"]/, 1]
   spec.authors       = ['Pretty Git Authors']
-  spec.email         = ['']
 
   spec.summary       = 'Git repository analytics and reporting CLI'
   spec.description   = 'Generates structured analytics from local Git repositories with multiple export formats.'
@@ -26,9 +25,11 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.homepage = 'https://github.com/MikoMikocchi/pretty-git'
+  spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = 'https://github.com/MikoMikocchi/pretty-git'
   spec.metadata['changelog_uri'] = 'https://github.com/MikoMikocchi/pretty-git/blob/main/CHANGELOG.md'
   spec.metadata['bug_tracker_uri'] = 'https://github.com/MikoMikocchi/pretty-git/issues'
+  spec.metadata['documentation_uri'] = 'https://github.com/MikoMikocchi/pretty-git#readme'
   spec.metadata['rubygems_mfa_required'] = 'true'
 
   spec.required_ruby_version = '>= 3.4'

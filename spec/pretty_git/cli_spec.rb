@@ -148,4 +148,10 @@ RSpec.describe PrettyGit::CLI do
     expect(txt).to include('--theme')
     expect(txt).to include('--metric')
   end
+
+  it 'returns 1 when --metric is used with non-languages report' do
+    code = parse_and_run(['authors', '--metric', 'bytes'])
+    expect(code).to eq(1)
+    expect(err.string).to include("--metric is only supported for 'languages' report")
+  end
 end

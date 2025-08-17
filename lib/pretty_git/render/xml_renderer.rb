@@ -10,16 +10,29 @@ module PrettyGit
         @io = io
       end
 
+      # rubocop:disable Metrics/CyclomaticComplexity
       def call(report, result, _filters)
         ordered = apply_order(report, result)
         doc = REXML::Document.new
         doc << REXML::XMLDecl.new('1.0', 'UTF-8')
-        root = doc.add_element('report')
+        root_name = case report
+                    when 'hotspots' then 'hotspotsReport'
+                    when 'churn' then 'churnReport'
+                    when 'ownership' then 'ownershipReport'
+                    when 'languages' then 'languagesReport'
+                    when 'files' then 'filesReport'
+                    when 'authors' then 'authorsReport'
+                    when 'activity' then 'activityReport'
+                    when 'heatmap' then 'heatmapReport'
+                    else 'report'
+                    end
+        root = doc.add_element(root_name)
         hash_to_xml(root, ordered)
         formatter = REXML::Formatters::Pretty.new(2)
         formatter.compact = true
         formatter.write(doc, @io)
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       private
 

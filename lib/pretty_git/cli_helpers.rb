@@ -75,7 +75,9 @@ module PrettyGit
       code = handle_version_help(options, parser, out)
       return code unless code.nil?
 
-      return nil if valid_report?(options[:report]) && valid_theme?(options[:theme]) && valid_metric?(options[:metric])
+      base_ok = valid_report?(options[:report]) && valid_theme?(options[:theme]) && valid_metric?(options[:metric])
+      conflicts_ok = validate_conflicts(options, err)
+      return nil if base_ok && conflicts_ok
 
       print_validation_errors(options, err)
       1
@@ -110,6 +112,17 @@ module PrettyGit
       return if valid_metric?(options[:metric])
 
       err.puts "Unknown metric: #{options[:metric]}. Supported: #{METRICS.join(', ')}"
+    end
+
+    # Returns true when flags are consistent; otherwise prints errors and returns false
+    def validate_conflicts(options, err)
+      ok = true
+      if options[:metric] && options[:report] != 'languages'
+        err.puts "--metric is only supported for 'languages' report"
+        ok = false
+      end
+      # time_bucket is accepted by multiple reports historically; do not enforce here.
+      ok
     end
 
     def build_filters(options)

@@ -40,7 +40,7 @@ RSpec.describe PrettyGit::Render::XmlRenderer do
 
     xml = REXML::Document.new(io.string)
     root = xml.root
-    expect(root.name).to eq('report')
+    expect(root.name).to eq('authorsReport')
     expect(root.elements['report']).not_to be_nil
     expect(root.elements['report'].text).to eq('authors')
     expect(root.elements['repo_path'].text).to eq('.')

@@ -2,15 +2,17 @@
 
 require 'spec_helper'
 require 'tmpdir'
+require_relative '../../lib/pretty_git/git/provider'
 
-RSpec.describe 'Exclude filters integration' do
-  def run(cmd, chdir: nil)
+RSpec.describe PrettyGit::Git::Provider do
+  def run(cmd)
     out = `#{cmd}`
     raise "Command failed: #{cmd}" unless $CHILD_STATUS.success?
 
     out
   end
 
+  # rubocop:disable RSpec/ExampleLength
   it 'excludes commits by author and excludes paths via pathspec' do
     Dir.mktmpdir('pg_git_') do |dir|
       Dir.chdir(dir) do
@@ -29,21 +31,19 @@ RSpec.describe 'Exclude filters integration' do
         run 'git add vendor/data.txt'
         run 'git commit -q -m "chore: bot" --author "CI Bot <bot@example.com>" --date "2025-01-03T00:00:00Z"'
 
-        filters = PrettyGit::Filters.new(
-          repo_path: dir,
-          branches: [],
-          authors: [],
-          exclude_authors: ['bot'],
-          paths: [],
-          exclude_paths: ['vendor/**'],
-          since: nil,
-          until: nil,
-          time_bucket: nil,
-          limit: 0,
-          format: 'json'
-        )
+        filters = PrettyGit::Filters.new(repo_path: dir,
+                                         branches: [],
+                                         authors: [],
+                                         exclude_authors: ['bot'],
+                                         paths: [],
+                                         exclude_paths: ['vendor/**'],
+                                         since: nil,
+                                         until: nil,
+                                         time_bucket: nil,
+                                         limit: 0,
+                                         format: 'json')
 
-        enum = PrettyGit::Git::Provider.new(filters).each_commit
+        enum = described_class.new(filters).each_commit
         commits = enum.to_a
 
         # Only Alice commit should pass (bot author excluded; vendor path excluded)
@@ -55,4 +55,5 @@ RSpec.describe 'Exclude filters integration' do
       end
     end
   end
+  # rubocop:enable RSpec/ExampleLength
 end

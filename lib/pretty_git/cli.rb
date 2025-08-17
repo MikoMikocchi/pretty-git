@@ -12,7 +12,7 @@ module PrettyGit
     SUPPORTED_REPORTS = %w[summary activity authors files heatmap languages hotspots churn ownership].freeze
     SUPPORTED_FORMATS = %w[console json csv md yaml xml].freeze
 
-    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity
     def self.run(argv = ARGV, out: $stdout, err: $stderr)
       options = {
         report: 'summary',
@@ -22,7 +22,7 @@ module PrettyGit
         exclude_authors: [],
         paths: [],
         exclude_paths: [],
-        time_bucket: 'week',
+        time_bucket: nil,
         limit: 10,
         format: 'console',
         out: nil,
@@ -61,6 +61,6 @@ module PrettyGit
       err.puts e.message
       2
     end
-    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity
   end
 end

@@ -24,7 +24,7 @@ RSpec.describe PrettyGit::Render::XmlRenderer do
     xa = render('churn', a)
     xb = render('churn', b)
 
-    pa = xa.xpath('//report/items/item/path').map(&:text)
+    pa = xa.xpath('//churnReport/items/item/path').map(&:text)
 
     expect(pa).to eq(%w[b.rb a.rb])
     expect(xa.to_xml).to eq(xb.to_xml)
@@ -32,7 +32,7 @@ RSpec.describe PrettyGit::Render::XmlRenderer do
 
   it 'renders ownership fields' do
     doc = render('ownership', [{ path: 'a.rb', owner: 'A', owner_share: 60.0, authors: 2 }])
-    item = doc.at_xpath('//report/items/item')
+    item = doc.at_xpath('//ownershipReport/items/item')
     expect(item.at_xpath('./path').text).to eq('a.rb')
     expect(item.at_xpath('./owner').text).to eq('A')
     expect(item.at_xpath('./owner_share').text).to eq('60.0')

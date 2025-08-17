@@ -132,6 +132,7 @@ RSpec.describe PrettyGit::Git::Provider do
 
       allow(Open3).to receive(:popen3) do |*cmd, chdir:, &blk|
         captured_cmd = cmd
+        _ = chdir
         blk.call(instance_double(IO), stdout, instance_double(IO, read: ''), wait_thr_success)
       end
 
