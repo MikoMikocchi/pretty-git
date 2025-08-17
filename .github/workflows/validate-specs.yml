@@ -33,10 +33,21 @@ jobs:
         run: bundle exec rake validate:xml
       - name: Markdown lint (mdl)
         run: bundle exec rake lint:markdown
+      - name: Prepare lychee output dir
+        run: mkdir -p lychee
       - name: Link check (lychee)
         uses: lycheeverse/lychee-action@v2
         with:
-          # Use our config to scan docs/**/*.md
-          args: --config lychee.toml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Explicitly provide required flags for v2 entrypoint
+          # Outputs JSON report into lychee/report.json and scans docs/**/*.md
+          args: >-
+            --mode default
+            --format json
+            --output lychee/report.json
+            --config lychee.toml
+            --github-token ${{ secrets.GITHUB_TOKEN }}
+            docs/**/*.md
+      - name: Print lychee summary
+        if: always()
+        run: |
+          test -f lychee/report.json && jq '.summary' lychee/report.json || echo "No lychee report produced"
