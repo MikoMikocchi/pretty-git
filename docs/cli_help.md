@@ -4,6 +4,8 @@
 
 ## Команды и флаги
 - `<report> <repo_path> [options]`
+  - `<repo_path>` по умолчанию `.` если опущен
+  - альтернативно можно указать репозиторий через `--repo PATH`
 - `--format, --out, --limit, --time-bucket, --since/--until, --branch, --author/--exclude-author, --path/--exclude-path, --no-color, --theme, --metric`.
 
 ## Совместимости/валидации

@@ -124,6 +124,10 @@ bundle exec bin/pretty-git activity . --time-bucket week --since 2025-01-01 \
 pretty-git <report> <repo_path> [options]
 ```
 
+Примечания:
+* `<repo_path>` по умолчанию — `.` (если опущен).
+* Репозиторий можно указать и через флаг `--repo PATH` как альтернативу позиционному аргументу.
+
 Доступные отчёты: `summary`, `activity`, `authors`, `files`, `heatmap`, `languages`, `hotspots`, `churn`, `ownership`.
 
 Ключевые опции:

@@ -124,6 +124,10 @@ General form:
 pretty-git <report> <repo_path> [options]
 ```
 
+Notes:
+* `<repo_path>` defaults to `.` if omitted.
+* You can also pass the repository via `--repo PATH` as an alternative to the positional argument.
+
 Available reports: `summary`, `activity`, `authors`, `files`, `heatmap`, `languages`, `hotspots`, `churn`, `ownership`.
 
 Key options:
