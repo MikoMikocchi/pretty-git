@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'rake'
+require 'rbconfig'
+require 'shellwords'
 
 desc 'Run rubocop'
 task :rubocop do
@@ -150,6 +152,27 @@ namespace :spec do
   desc 'Regenerate golden files (writes fixtures)'
   task 'golden:update' do
     sh 'UPDATE_GOLDEN=1 bundle exec rspec spec/integration/*golden_files*'
+  end
+end
+
+# Performance tasks
+namespace :perf do
+  desc 'Run perf baseline. Usage: rake perf:baseline REPO=path REPORTS="summary,files" FORMAT=console ITERS=3'
+  task :baseline do
+    repo = ENV['REPO'] || '.'
+    reports = ENV['REPORTS'] || 'summary,files,authors,languages,activity,heatmap,hotspots,churn,ownership'
+    format = ENV['FORMAT'] || 'console'
+    iters = (ENV['ITERS'] || '3').to_i
+    since = ENV.fetch('SINCE', nil)
+    until_at = ENV.fetch('UNTIL', nil)
+
+    ruby = RbConfig.ruby
+    script = File.expand_path(File.join(__dir__, 'scripts', 'perf_baseline.rb'))
+    args = [ruby, script, '--repo', repo, '--reports', reports, '--format', format, '--iters', iters.to_s]
+    args += ['--since', since] if since
+    args += ['--until', until_at] if until_at
+
+    sh Shellwords.shelljoin(args)
   end
 end
 
