@@ -1,0 +1,50 @@
+name: Homebrew Smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *' # daily at 03:00 UTC
+
+jobs:
+  brew_smoke:
+    runs-on: macos-latest
+    steps:
+      - name: Check Homebrew formula availability
+        id: check
+        run: |
+          set -euo pipefail
+          if brew info pretty-git >/dev/null 2>&1; then
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install pretty-git from Homebrew
+        if: steps.check.outputs.available == 'true'
+        run: |
+          set -euo pipefail
+          brew update
+          brew install pretty-git
+
+      - name: Smoke run (help/version)
+        if: steps.check.outputs.available == 'true'
+        run: |
+          set -euo pipefail
+          pretty-git --version
+          pretty-git --help | head -n 10
+
+      - name: Smoke run (summary json)
+        if: steps.check.outputs.available == 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p tmp/smoke && cd tmp/smoke
+          git init .
+          git config user.email ci@example.com
+          git config user.name CI
+          echo "hello" > README.md
+          git add README.md && git commit -m "init"
+          pretty-git summary . --format json | head -c 200
+
+      - name: Skip note
+        if: steps.check.outputs.available != 'true'
+        run: echo "Homebrew formula 'pretty-git' not found; skipping smoke."
