@@ -2,6 +2,8 @@
 
 require 'time'
 require 'json'
+require 'find'
+require 'set'
 
 module PrettyGit
   module Analytics
@@ -125,9 +127,25 @@ module PrettyGit
       # rubocop:enable Metrics/AbcSize
 
       def self.each_source_file(include_globs, exclude_globs)
-        # Build list of files under repo respecting includes/excludes
-        all = Dir.glob('**/*', File::FNM_DOTMATCH).select { |p| File.file?(p) }
-        files = all.reject { |p| vendor_path?(p) || binary_ext?(p) }
+        # Traverse tree with early prune for vendor/binary paths, then apply include/exclude
+        files = []
+        Find.find('.') do |path|
+          rel = path.sub(%r{^\./}, '')
+          # Prune vendor dirs early
+          if File.directory?(path)
+            dir = File.basename(path)
+            if VENDOR_DIRS.include?(dir)
+              Find.prune
+              next
+            end
+            next
+          end
+          next unless File.file?(path)
+          next if rel.empty?
+          next if vendor_path?(rel) || binary_ext?(rel)
+          files << rel
+        end
+
         files = filter_includes(files, include_globs)
         files = filter_excludes(files, exclude_globs)
         files.each { |rel| yield rel }
@@ -152,7 +170,8 @@ module PrettyGit
         return files if globs.empty?
 
         allowed = globs.flat_map { |g| Dir.glob(g) }
-        files.select { |f| allowed.include?(f) }
+        allowed_set = allowed.to_set
+        files.select { |f| allowed_set.include?(f) }
       end
 
       def self.filter_excludes(files, globs)
@@ -160,7 +179,8 @@ module PrettyGit
         return files if globs.empty?
 
         blocked = globs.flat_map { |g| Dir.glob(g) }
-        files.reject { |f| blocked.include?(f) }
+        blocked_set = blocked.to_set
+        files.reject { |f| blocked_set.include?(f) }
       end
 
       def self.vendor_path?(path)

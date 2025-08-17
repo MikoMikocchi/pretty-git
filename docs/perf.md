@@ -104,4 +104,5 @@ rake perf:baseline REPO=. REPORTS="languages" FORMAT=json ITERS=1 PERF_ARGS="--p
   - В `lib/pretty_git/analytics/languages.rb` строки считаются только при `metric=loc` (для `bytes|files` не читаем файл построчно).
   - В `each_source_file()` убран `File.expand_path` — работаем с относительными путями.
 - Результат (TypeScript-main, ITERS=1, `--prof`): `languages` ≈ 1.30s (ранее ≈ 4.9–5.0s).
-- Следующий шаг: замерить ITERS=3 и при необходимости оптимизировать include/exclude фильтры.
+- Повторный замер (ITERS=3, `--prof`): min=0.85s avg=0.85s max=0.86s, RSS≈448 KB.
+- Следующий шаг: при необходимости оптимизировать include/exclude фильтры.
