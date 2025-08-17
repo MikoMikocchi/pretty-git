@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<languagesReport>
+  <report>languages</report>
+  <metric>bytes</metric>
+  <items>
+    <item>
+      <language>Ruby</language>
+      <bytes>600</bytes>
+      <percent>60.0</percent>
+      <color>#701516</color>
+    </item>
+    <item>
+      <language>JavaScript</language>
+      <bytes>400</bytes>
+      <percent>40.0</percent>
+      <color>#f1e05a</color>
+    </item>
+  </items>
+</languagesReport>

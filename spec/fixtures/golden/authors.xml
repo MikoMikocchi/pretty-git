@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<authorsReport>
+  <report>authors</report>
+  <items>
+    <item>
+      <author>Alice</author>
+      <author_email>a@ex</author_email>
+      <commits>3</commits>
+      <additions>50</additions>
+      <deletions>10</deletions>
+      <avg_commit_size>20.0</avg_commit_size>
+    </item>
+    <item>
+      <author>Bob</author>
+      <author_email>b@ex</author_email>
+      <commits>2</commits>
+      <additions>30</additions>
+      <deletions>5</deletions>
+      <avg_commit_size>17.5</avg_commit_size>
+    </item>
+  </items>
+</authorsReport>

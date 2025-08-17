@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<filesReport>
+  <report>files</report>
+  <items>
+    <item>
+      <path>b.rb</path>
+      <commits>2</commits>
+      <additions>2</additions>
+      <deletions>1</deletions>
+      <changes>3</changes>
+    </item>
+    <item>
+      <path>a.rb</path>
+      <commits>1</commits>
+      <additions>1</additions>
+      <deletions>0</deletions>
+      <changes>1</changes>
+    </item>
+  </items>
+</filesReport>

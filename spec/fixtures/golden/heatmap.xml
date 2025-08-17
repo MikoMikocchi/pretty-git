@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<heatmapReport>
+  <report>heatmap</report>
+  <items>
+    <item>
+      <dow>1</dow>
+      <hour>10</hour>
+      <commits>3</commits>
+    </item>
+    <item>
+      <dow>1</dow>
+      <hour>11</hour>
+      <commits>1</commits>
+    </item>
+  </items>
+</heatmapReport>
