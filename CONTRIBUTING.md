@@ -65,6 +65,8 @@ Be respectful. Help us keep a welcoming, inclusive community.
   - docs, refactor, test, chore, perf
 - Write clear PR descriptions. Reference issues when applicable.
 
+See also: `docs/testing.md` — стратегия тестирования, правила детерминизма и golden-тесты (как запускать/обновлять снапшоты).
+
 ## Project Structure
 - `lib/pretty_git/` — app code
   - `analytics/` — report analytics
@@ -88,6 +90,20 @@ Be respectful. Help us keep a welcoming, inclusive community.
 - Unit specs (analytics, renderers)
 - CLI specs for arguments parsing and exit codes
 - Determinism/integration specs for exporters per docs
+
+Golden tests (snapshots):
+
+```bash
+# run golden-only suite
+bundle exec rake spec:golden
+
+# update snapshots (review diffs; dedicated commit)
+UPDATE_GOLDEN=1 bundle exec rake spec:golden
+```
+
+Примечания:
+- Обновление снапшотов управляется `UPDATE_GOLDEN=1` (см. `spec/support/golden_helper.rb`).
+- Для XML сравнение нормализует завершающие переводы строки/пробелы.
 
 ## Submitting a PR
 - Ensure green `rubocop` and `rspec`

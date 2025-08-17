@@ -597,5 +597,7 @@ bundle exec rubocop
 
 Style — RuboCop clean. Tests cover aggregators, renderers, CLI, and integration scenarios (determinism, format correctness).
 
+For detailed testing strategy, determinism rules, and golden tests workflow (how to run/update snapshots), see `docs/testing.md`.
+
 ## 📄 License
 MIT © Contributors
