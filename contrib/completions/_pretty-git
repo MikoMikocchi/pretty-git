@@ -1,0 +1,39 @@
+#compdef pretty-git
+# zsh completion for pretty-git
+# Install: copy to a directory in your $fpath and `autoload -U compinit && compinit`
+
+local -a reports formats metrics themes opts
+reports=(summary activity authors files heatmap languages hotspots churn ownership)
+formats=(console json csv md yaml xml)
+metrics=(bytes files loc)
+themes=(basic bright mono)
+opts=(
+  '--help[Show help]'
+  '--version[Show version]'
+  '--verbose[Verbose output (debug)]'
+  '--repo[Path to git repository]:path:_files'
+  '--branch[Branch (repeatable)]:name:'
+  '--since[Start of period]:datetime:'
+  '--until[End of period]:datetime:'
+  '--author[Include author (repeatable)]:author:'
+  '--exclude-author[Exclude author (repeatable)]:author:'
+  '--time-bucket[Time bucket for activity]:bucket:(day week month)'
+  '--path[Include path/glob (repeatable)]:glob:_files'
+  '--exclude-path[Exclude path/glob (repeatable)]:glob:_files'
+  '--limit[Top limit (0/all = unlimited)]:limit:(all)'
+  '--format[Output format]:format:((console\:Console json\:JSON csv\:CSV md\:Markdown yaml\:YAML xml\:XML))'
+  '--out[Output file path]:file:_files'
+  '--no-color[Disable colors in console output]'
+  '--theme[Console color theme]:theme:(basic bright mono)'
+  '--metric[Languages metric]:metric:(bytes files loc)'
+)
+
+_arguments -C \
+  '1:report:((summary\:Summary activity\:Activity authors\:Authors files\:Files heatmap\:Heatmap languages\:Languages hotspots\:Hotspots churn\:Churn ownership\:Ownership))' \
+  '*::options:->opts'
+
+case $state in
+  opts)
+    _describe -t options 'options' opts && return
+  ;;
+esac
