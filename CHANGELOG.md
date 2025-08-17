@@ -7,17 +7,22 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 ## [Unreleased]
  
 
-## [0.1.4] - 2025-08-14
+## [0.1.4] - 2025-08-17
 ### Added
 - Integration tests for new reports exports: CSV/Markdown/YAML/XML for `hotspots`, `churn`, `ownership`.
 - Schema validations: `rake validate:json`, `rake validate:xml` to ensure format compatibility.
+- CI: expanded matrix to include macOS; smoke test for installed binary (`--help`, `--version`).
 
 ### Changed
 - Renderers (`MarkdownRenderer`, `YamlRenderer`, `XmlRenderer`): deterministic sorting for all new reports according to `docs/determinism.md`.
-- Documentation: `README.md` and `README.ru.md` updated with sections and examples for new reports and all export formats; XML examples unified to `<report>` root with nested elements.
+- XML: per-report root elements in XML exports to match XSDs (`hotspotsReport`, `churnReport`, `ownershipReport`, `languagesReport`, etc.).
+- Documentation: `README.md` and `README.ru.md` updated with sections and examples for new reports and all export formats.
+- CLI: keep `--time-bucket` permissive; default `time_bucket=nil`.
 
 ### Fixed
-- Minor docs inconsistencies and XML examples structure mismatches.
+- Time parsing: interpret date-only inputs (`YYYY-MM-DD`) as UTC midnight and normalize to UTC ISO8601.
+- CLI UX: error when `--metric` is used outside `languages` report.
+- Tests/specs: updated XML specs to per-report roots; added timezone edge cases; fixed Open3 `popen3` stubs (`chdir:`) and integration requires.
 
 
 ## [0.1.3] - 2025-08-14
