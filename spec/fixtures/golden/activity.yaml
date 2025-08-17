@@ -1,0 +1,13 @@
+---
+report: activity
+items:
+- bucket: day
+  timestamp: '2025-01-01T00:00:00Z'
+  commits: 2
+  additions: 3
+  deletions: 1
+- bucket: day
+  timestamp: '2025-01-02T00:00:00Z'
+  commits: 1
+  additions: 1
+  deletions: 0

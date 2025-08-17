@@ -78,6 +78,9 @@ RSpec.describe 'Golden files stability (XML)' do
 
   def expect_matches_golden(name, actual)
     golden_path = File.expand_path("../fixtures/golden/#{name}.xml", __dir__)
+    if ENV['UPDATE_GOLDEN'] == '1'
+      File.write(golden_path, actual)
+    end
     expect(File).to exist(golden_path), "Golden file missing: #{golden_path}"
     expected = File.read(golden_path)
     # XML pretty formatter may omit trailing newline; ignore trailing whitespace differences

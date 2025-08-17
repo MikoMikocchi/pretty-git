@@ -1,0 +1,15 @@
+---
+report: authors
+items:
+- author: Alice
+  author_email: a@ex
+  commits: 3
+  additions: 50
+  deletions: 10
+  avg_commit_size: 20.0
+- author: Bob
+  author_email: b@ex
+  commits: 2
+  additions: 30
+  deletions: 5
+  avg_commit_size: 17.5

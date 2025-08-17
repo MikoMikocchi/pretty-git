@@ -17,6 +17,9 @@ RSpec.describe 'Golden files stability (CSV)' do
 
   def expect_matches_golden(name, actual)
     golden_path = File.expand_path("../fixtures/golden/#{name}.csv", __dir__)
+    if ENV['UPDATE_GOLDEN'] == '1'
+      File.write(golden_path, actual)
+    end
     expect(File).to exist(golden_path), "Golden file missing: #{golden_path}"
     expected = File.read(golden_path)
     expect(actual).to eq(expected), "Mismatch against golden: #{name}.csv"

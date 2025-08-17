@@ -1,0 +1,12 @@
+---
+report: languages
+metric: bytes
+items:
+- language: Ruby
+  bytes: 600
+  percent: 60.0
+  color: "#701516"
+- language: JavaScript
+  bytes: 400
+  percent: 40.0
+  color: "#f1e05a"

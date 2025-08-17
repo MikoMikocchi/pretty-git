@@ -15,4 +15,7 @@ jobs:
           ruby-version: '3.4'
           bundler-cache: true
       - run: bundle install --jobs 4 --retry 3
-      - run: bundle exec rspec
+      - name: Run full RSpec suite
+        run: bundle exec rspec
+      - name: Run golden specs
+        run: bundle exec rake spec:golden

@@ -146,6 +146,11 @@ namespace :spec do
   task :golden do
     sh 'bundle exec rspec spec/integration/*golden_files*'
   end
+
+  desc 'Regenerate golden files (writes fixtures)'
+  task 'golden:update' do
+    sh 'UPDATE_GOLDEN=1 bundle exec rspec spec/integration/*golden_files*'
+  end
 end
 
 task default: %i[rubocop spec]

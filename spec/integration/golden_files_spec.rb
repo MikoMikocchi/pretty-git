@@ -15,8 +15,72 @@ RSpec.describe 'Golden files stability (YAML)' do
     io.string
   end
 
+  it 'files.yaml stays stable' do
+    result = {
+      report: 'files',
+      items: [
+        { path: 'b.rb', commits: 2, additions: 2, deletions: 1, changes: 3 },
+        { path: 'a.rb', commits: 1, additions: 1, deletions: 0, changes: 1 }
+      ]
+    }
+    actual = render_and_read('files', result)
+    expect_matches_golden('files', actual)
+  end
+
+  it 'authors.yaml stays stable' do
+    result = {
+      report: 'authors',
+      items: [
+        { author: 'Alice', author_email: 'a@ex', commits: 3, additions: 50, deletions: 10, avg_commit_size: 20.0 },
+        { author: 'Bob', author_email: 'b@ex', commits: 2, additions: 30, deletions: 5, avg_commit_size: 17.5 }
+      ]
+    }
+    actual = render_and_read('authors', result)
+    expect_matches_golden('authors', actual)
+  end
+
+  it 'languages.yaml stays stable' do
+    result = {
+      report: 'languages',
+      metric: 'bytes',
+      items: [
+        { language: 'Ruby', bytes: 600, percent: 60.0, color: '#701516' },
+        { language: 'JavaScript', bytes: 400, percent: 40.0, color: '#f1e05a' }
+      ]
+    }
+    actual = render_and_read('languages', result)
+    expect_matches_golden('languages', actual)
+  end
+
+  it 'activity.yaml stays stable' do
+    result = {
+      report: 'activity',
+      items: [
+        { bucket: 'day', timestamp: '2025-01-01T00:00:00Z', commits: 2, additions: 3, deletions: 1 },
+        { bucket: 'day', timestamp: '2025-01-02T00:00:00Z', commits: 1, additions: 1, deletions: 0 }
+      ]
+    }
+    actual = render_and_read('activity', result)
+    expect_matches_golden('activity', actual)
+  end
+
+  it 'heatmap.yaml stays stable' do
+    result = {
+      report: 'heatmap',
+      items: [
+        { dow: 1, hour: 10, commits: 3 },
+        { dow: 1, hour: 11, commits: 1 }
+      ]
+    }
+    actual = render_and_read('heatmap', result)
+    expect_matches_golden('heatmap', actual)
+  end
+
   def expect_matches_golden(name, actual)
     golden_path = File.expand_path("../fixtures/golden/#{name}.yaml", __dir__)
+    if ENV['UPDATE_GOLDEN'] == '1'
+      File.write(golden_path, actual)
+    end
     expect(File).to exist(golden_path), "Golden file missing: #{golden_path}"
     expected = File.read(golden_path)
     expect(actual).to eq(expected), "Mismatch against golden: #{name}.yaml"
