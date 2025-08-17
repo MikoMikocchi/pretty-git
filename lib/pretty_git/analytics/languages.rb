@@ -3,7 +3,6 @@
 require 'time'
 require 'json'
 require 'find'
-require 'set'
 
 module PrettyGit
   module Analytics
@@ -82,6 +81,7 @@ module PrettyGit
     # Default metric: bytes (similar to GitHub Linguist approach).
     # rubocop:disable Metrics/ClassLength
     class Languages
+      # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       def self.call(_enum, filters)
         repo = filters.repo_path
         prof = ENV['PG_PROF'] == '1'
@@ -98,11 +98,16 @@ module PrettyGit
           t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
           elapsed = (t1 - t0)
           files = totals[:files]
-          warn format('[pg_prof] languages: time=%.3fs files=%d metric=%s', elapsed, files, metric)
-          warn("[pg_prof_json] #{({ component: 'languages', time_sec: elapsed, files: files, metric: metric }).to_json}")
+          warn format(
+            '[pg_prof] languages: time=%<sec>.3fs files=%<files>d metric=%<metric>s',
+            { sec: elapsed, files: files, metric: metric }
+          )
+          summary = { component: 'languages', time_sec: elapsed, files: files, metric: metric }
+          warn("[pg_prof_json] #{summary.to_json}")
         end
         res
       end
+      # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
       # rubocop:disable Metrics/AbcSize
       def self.calculate(repo_path, include_globs:, exclude_globs:, metric: 'bytes')
@@ -115,7 +120,7 @@ module PrettyGit
             next unless lang
 
             size = safe_file_size(path)
-            lines = (metric == 'loc') ? safe_count_lines(path) : 0
+            lines = metric == 'loc' ? safe_count_lines(path) : 0
             agg = by_lang[lang]
             agg[:bytes] += size
             agg[:files] += 1
@@ -126,7 +131,8 @@ module PrettyGit
       end
       # rubocop:enable Metrics/AbcSize
 
-      def self.each_source_file(include_globs, exclude_globs)
+      # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+      def self.each_source_file(include_globs, exclude_globs, &block)
         # Traverse tree with early prune for vendor/binary paths, then apply include/exclude
         files = []
         Find.find('.') do |path|
@@ -143,13 +149,15 @@ module PrettyGit
           next unless File.file?(path)
           next if rel.empty?
           next if vendor_path?(rel) || binary_ext?(rel)
+
           files << rel
         end
 
         files = filter_includes(files, include_globs)
         files = filter_excludes(files, exclude_globs)
-        files.each { |rel| yield rel }
+        files.each { |rel| block.call(rel) }
       end
+      # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
       def self.safe_file_size(path)
         File.size(path)
@@ -170,8 +178,8 @@ module PrettyGit
         return files if globs.empty?
 
         allowed = globs.flat_map { |g| Dir.glob(g) }
-        allowed_set = allowed.to_set
-        files.select { |f| allowed_set.include?(f) }
+        allowed_map = allowed.each_with_object({}) { |f, h| h[f] = true }
+        files.select { |f| allowed_map[f] }
       end
 
       def self.filter_excludes(files, globs)
@@ -179,8 +187,8 @@ module PrettyGit
         return files if globs.empty?
 
         blocked = globs.flat_map { |g| Dir.glob(g) }
-        blocked_set = blocked.to_set
-        files.reject { |f| blocked_set.include?(f) }
+        blocked_map = blocked.each_with_object({}) { |f, h| h[f] = true }
+        files.reject { |f| blocked_map[f] }
       end
 
       def self.vendor_path?(path)

@@ -78,7 +78,7 @@ opts[:reports].each do |report|
     end
     start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     if opts[:prof]
-      log = format('perf_profile_%s_iter%02d.log', report, i + 1)
+      log = format('perf_profile_%<report>s_iter%<iter>02d.log', { report: report, iter: i + 1 })
       File.open(log, 'w') do |f|
         Open3.popen3(env, *args) do |_stdin, _stdout, stderr, thr|
           pid = thr.pid

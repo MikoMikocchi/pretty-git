@@ -20,7 +20,7 @@ module PrettyGit
       end
 
       # Returns Enumerator of PrettyGit::Types::Commit
-      # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+      # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/BlockLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def each_commit
         Enumerator.new do |yld|
           prof = ENV['PG_PROF'] == '1'
@@ -65,7 +65,10 @@ module PrettyGit
           if prof
             # Emit a compact profile to stderr
             elapsed = (t1 - t0)
-            warn format('[pg_prof] git_provider: time=%.3fs headers=%d numstat_lines=%d', elapsed, headers, numstat_lines)
+            warn format(
+              '[pg_prof] git_provider: time=%<sec>.3fs headers=%<headers>d numstat_lines=%<num>d',
+              { sec: elapsed, headers: headers, num: numstat_lines }
+            )
             summary = {
               component: 'git_provider',
               time_sec: elapsed,
@@ -76,7 +79,7 @@ module PrettyGit
           end
         end
       end
-      # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/BlockLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
       private
 
