@@ -4,25 +4,15 @@ require 'spec_helper'
 require 'stringio'
 require_relative '../../lib/pretty_git/render/json_renderer'
 
-RSpec.describe 'Golden files stability (JSON)' do
+RSpec.describe PrettyGit::Render::JsonRenderer do
   let(:io) { StringIO.new }
-  let(:renderer) { PrettyGit::Render::JsonRenderer.new(io: io) }
+  let(:renderer) { described_class.new(io: io) }
 
   def render_and_read(report, result)
     io.truncate(0)
     io.rewind
     renderer.call(report, result, nil)
     io.string
-  end
-
-  def expect_matches_golden(name, actual)
-    golden_path = File.expand_path("../fixtures/golden/#{name}.json", __dir__)
-    if ENV['UPDATE_GOLDEN'] == '1'
-      File.write(golden_path, actual)
-    end
-    expect(File).to exist(golden_path), "Golden file missing: #{golden_path}"
-    expected = File.read(golden_path)
-    expect(actual).to eq(expected), "Mismatch against golden: #{name}.json"
   end
 
   it 'hotspots.json stays stable' do
@@ -35,7 +25,7 @@ RSpec.describe 'Golden files stability (JSON)' do
       ]
     }
     actual = render_and_read('hotspots', result)
-    expect_matches_golden('hotspots', actual)
+    expect_matches_golden(:json, 'hotspots', actual)
   end
 
   it 'churn.json stays stable' do
@@ -47,7 +37,7 @@ RSpec.describe 'Golden files stability (JSON)' do
       ]
     }
     actual = render_and_read('churn', result)
-    expect_matches_golden('churn', actual)
+    expect_matches_golden(:json, 'churn', actual)
   end
 
   it 'ownership.json stays stable' do
@@ -59,7 +49,7 @@ RSpec.describe 'Golden files stability (JSON)' do
       ]
     }
     actual = render_and_read('ownership', result)
-    expect_matches_golden('ownership', actual)
+    expect_matches_golden(:json, 'ownership', actual)
   end
 
   it 'files.json stays stable' do
@@ -71,7 +61,7 @@ RSpec.describe 'Golden files stability (JSON)' do
       ]
     }
     actual = render_and_read('files', result)
-    expect_matches_golden('files', actual)
+    expect_matches_golden(:json, 'files', actual)
   end
 
   it 'authors.json stays stable' do
@@ -83,7 +73,7 @@ RSpec.describe 'Golden files stability (JSON)' do
       ]
     }
     actual = render_and_read('authors', result)
-    expect_matches_golden('authors', actual)
+    expect_matches_golden(:json, 'authors', actual)
   end
 
   it 'languages.json stays stable' do
@@ -96,7 +86,7 @@ RSpec.describe 'Golden files stability (JSON)' do
       ]
     }
     actual = render_and_read('languages', result)
-    expect_matches_golden('languages', actual)
+    expect_matches_golden(:json, 'languages', actual)
   end
 
   it 'activity.json stays stable' do
@@ -108,7 +98,7 @@ RSpec.describe 'Golden files stability (JSON)' do
       ]
     }
     actual = render_and_read('activity', result)
-    expect_matches_golden('activity', actual)
+    expect_matches_golden(:json, 'activity', actual)
   end
 
   it 'heatmap.json stays stable' do
@@ -120,6 +110,6 @@ RSpec.describe 'Golden files stability (JSON)' do
       ]
     }
     actual = render_and_read('heatmap', result)
-    expect_matches_golden('heatmap', actual)
+    expect_matches_golden(:json, 'heatmap', actual)
   end
 end

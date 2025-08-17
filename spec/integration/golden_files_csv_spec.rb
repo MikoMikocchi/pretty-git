@@ -4,25 +4,15 @@ require 'spec_helper'
 require 'stringio'
 require_relative '../../lib/pretty_git/render/csv_renderer'
 
-RSpec.describe 'Golden files stability (CSV)' do
+RSpec.describe PrettyGit::Render::CsvRenderer do
   let(:io) { StringIO.new }
-  let(:renderer) { PrettyGit::Render::CsvRenderer.new(io: io) }
+  let(:renderer) { described_class.new(io: io) }
 
   def render_and_read(report, result)
     io.truncate(0)
     io.rewind
     renderer.call(report, result, nil)
     io.string
-  end
-
-  def expect_matches_golden(name, actual)
-    golden_path = File.expand_path("../fixtures/golden/#{name}.csv", __dir__)
-    if ENV['UPDATE_GOLDEN'] == '1'
-      File.write(golden_path, actual)
-    end
-    expect(File).to exist(golden_path), "Golden file missing: #{golden_path}"
-    expected = File.read(golden_path)
-    expect(actual).to eq(expected), "Mismatch against golden: #{name}.csv"
   end
 
   it 'hotspots.csv stays stable' do
@@ -34,7 +24,7 @@ RSpec.describe 'Golden files stability (CSV)' do
       ]
     }
     actual = render_and_read('hotspots', result)
-    expect_matches_golden('hotspots', actual)
+    expect_matches_golden(:csv, 'hotspots', actual)
   end
 
   it 'churn.csv stays stable' do
@@ -46,7 +36,7 @@ RSpec.describe 'Golden files stability (CSV)' do
       ]
     }
     actual = render_and_read('churn', result)
-    expect_matches_golden('churn', actual)
+    expect_matches_golden(:csv, 'churn', actual)
   end
 
   it 'ownership.csv stays stable' do
@@ -58,7 +48,7 @@ RSpec.describe 'Golden files stability (CSV)' do
       ]
     }
     actual = render_and_read('ownership', result)
-    expect_matches_golden('ownership', actual)
+    expect_matches_golden(:csv, 'ownership', actual)
   end
 
   it 'files.csv stays stable' do
@@ -70,7 +60,7 @@ RSpec.describe 'Golden files stability (CSV)' do
       ]
     }
     actual = render_and_read('files', result)
-    expect_matches_golden('files', actual)
+    expect_matches_golden(:csv, 'files', actual)
   end
 
   it 'authors.csv stays stable' do
@@ -82,7 +72,7 @@ RSpec.describe 'Golden files stability (CSV)' do
       ]
     }
     actual = render_and_read('authors', result)
-    expect_matches_golden('authors', actual)
+    expect_matches_golden(:csv, 'authors', actual)
   end
 
   it 'languages.csv stays stable' do
@@ -95,7 +85,7 @@ RSpec.describe 'Golden files stability (CSV)' do
       ]
     }
     actual = render_and_read('languages', result)
-    expect_matches_golden('languages', actual)
+    expect_matches_golden(:csv, 'languages', actual)
   end
 
   it 'activity.csv stays stable' do
@@ -107,7 +97,7 @@ RSpec.describe 'Golden files stability (CSV)' do
       ]
     }
     actual = render_and_read('activity', result)
-    expect_matches_golden('activity', actual)
+    expect_matches_golden(:csv, 'activity', actual)
   end
 
   it 'heatmap.csv stays stable' do
@@ -119,6 +109,6 @@ RSpec.describe 'Golden files stability (CSV)' do
       ]
     }
     actual = render_and_read('heatmap', result)
-    expect_matches_golden('heatmap', actual)
+    expect_matches_golden(:csv, 'heatmap', actual)
   end
 end

@@ -9,3 +9,6 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
+
+# Autoload support helpers
+Dir[File.expand_path('support/**/*.rb', __dir__)].each { |f| require f }

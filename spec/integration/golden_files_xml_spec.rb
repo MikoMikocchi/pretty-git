@@ -4,9 +4,9 @@ require 'spec_helper'
 require 'stringio'
 require_relative '../../lib/pretty_git/render/xml_renderer'
 
-RSpec.describe 'Golden files stability (XML)' do
+RSpec.describe PrettyGit::Render::XmlRenderer do
   let(:io) { StringIO.new }
-  let(:renderer) { PrettyGit::Render::XmlRenderer.new(io: io) }
+  let(:renderer) { described_class.new(io: io) }
 
   def render_and_read(report, result)
     io.truncate(0)
@@ -24,7 +24,7 @@ RSpec.describe 'Golden files stability (XML)' do
       ]
     }
     actual = render_and_read('files', result)
-    expect_matches_golden('files', actual)
+    expect_matches_golden(:xml, 'files', actual)
   end
 
   it 'authors.xml stays stable' do
@@ -36,7 +36,7 @@ RSpec.describe 'Golden files stability (XML)' do
       ]
     }
     actual = render_and_read('authors', result)
-    expect_matches_golden('authors', actual)
+    expect_matches_golden(:xml, 'authors', actual)
   end
 
   it 'languages.xml stays stable' do
@@ -49,7 +49,7 @@ RSpec.describe 'Golden files stability (XML)' do
       ]
     }
     actual = render_and_read('languages', result)
-    expect_matches_golden('languages', actual)
+    expect_matches_golden(:xml, 'languages', actual)
   end
 
   it 'activity.xml stays stable' do
@@ -61,7 +61,7 @@ RSpec.describe 'Golden files stability (XML)' do
       ]
     }
     actual = render_and_read('activity', result)
-    expect_matches_golden('activity', actual)
+    expect_matches_golden(:xml, 'activity', actual)
   end
 
   it 'heatmap.xml stays stable' do
@@ -73,19 +73,10 @@ RSpec.describe 'Golden files stability (XML)' do
       ]
     }
     actual = render_and_read('heatmap', result)
-    expect_matches_golden('heatmap', actual)
+    expect_matches_golden(:xml, 'heatmap', actual)
   end
 
-  def expect_matches_golden(name, actual)
-    golden_path = File.expand_path("../fixtures/golden/#{name}.xml", __dir__)
-    if ENV['UPDATE_GOLDEN'] == '1'
-      File.write(golden_path, actual)
-    end
-    expect(File).to exist(golden_path), "Golden file missing: #{golden_path}"
-    expected = File.read(golden_path)
-    # XML pretty formatter may omit trailing newline; ignore trailing whitespace differences
-    expect(actual.rstrip).to eq(expected.rstrip), "Mismatch against golden: #{name}.xml"
-  end
+  # Use shared helper expect_matches_golden(:xml, ...)
 
   it 'hotspots.xml stays stable' do
     result = {
@@ -96,7 +87,7 @@ RSpec.describe 'Golden files stability (XML)' do
       ]
     }
     actual = render_and_read('hotspots', result)
-    expect_matches_golden('hotspots', actual)
+    expect_matches_golden(:xml, 'hotspots', actual)
   end
 
   it 'churn.xml stays stable' do
@@ -108,7 +99,7 @@ RSpec.describe 'Golden files stability (XML)' do
       ]
     }
     actual = render_and_read('churn', result)
-    expect_matches_golden('churn', actual)
+    expect_matches_golden(:xml, 'churn', actual)
   end
 
   it 'ownership.xml stays stable' do
@@ -120,6 +111,6 @@ RSpec.describe 'Golden files stability (XML)' do
       ]
     }
     actual = render_and_read('ownership', result)
-    expect_matches_golden('ownership', actual)
+    expect_matches_golden(:xml, 'ownership', actual)
   end
 end
