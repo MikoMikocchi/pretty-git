@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ownershipReport>
+  <report>ownership</report>
+  <items>
+    <item>
+      <path>a.rb</path>
+      <owner>A &lt;a@ex&gt;</owner>
+      <owner_share>60.0</owner_share>
+      <authors>2</authors>
+    </item>
+    <item>
+      <path>b.rb</path>
+      <owner>B &lt;b@ex&gt;</owner>
+      <owner_share>40.0</owner_share>
+      <authors>3</authors>
+    </item>
+  </items>
+</ownershipReport>

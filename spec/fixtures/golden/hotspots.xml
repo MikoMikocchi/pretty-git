@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hotspotsReport>
+  <report>hotspots</report>
+  <items>
+    <item>
+      <path>b.rb</path>
+      <score>1</score>
+      <commits>2</commits>
+      <additions>2</additions>
+      <deletions>1</deletions>
+      <changes>3</changes>
+    </item>
+    <item>
+      <path>a.rb</path>
+      <score>1</score>
+      <commits>1</commits>
+      <additions>1</additions>
+      <deletions>0</deletions>
+      <changes>1</changes>
+    </item>
+  </items>
+</hotspotsReport>

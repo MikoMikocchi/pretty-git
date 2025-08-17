@@ -1,0 +1,21 @@
+{
+  "report": "hotspots",
+  "items": [
+    {
+      "path": "b.rb",
+      "score": 1,
+      "commits": 2,
+      "additions": 2,
+      "deletions": 1,
+      "changes": 3
+    },
+    {
+      "path": "a.rb",
+      "score": 1,
+      "commits": 1,
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1
+    }
+  ]
+}

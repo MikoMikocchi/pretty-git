@@ -1,0 +1,19 @@
+{
+  "report": "churn",
+  "items": [
+    {
+      "path": "b.rb",
+      "churn": 6,
+      "commits": 2,
+      "additions": 4,
+      "deletions": 2
+    },
+    {
+      "path": "a.rb",
+      "churn": 3,
+      "commits": 1,
+      "additions": 2,
+      "deletions": 1
+    }
+  ]
+}

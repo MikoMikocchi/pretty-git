@@ -141,4 +141,11 @@ end
 
 # rubocop:enable Metrics/BlockLength
 
+namespace :spec do
+  desc 'Run only golden files specs (YAML/JSON/XML/CSV)'
+  task :golden do
+    sh 'bundle exec rspec spec/integration/*golden_files*'
+  end
+end
+
 task default: %i[rubocop spec]

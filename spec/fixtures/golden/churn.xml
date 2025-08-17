@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<churnReport>
+  <report>churn</report>
+  <items>
+    <item>
+      <path>b.rb</path>
+      <churn>6</churn>
+      <commits>2</commits>
+      <additions>4</additions>
+      <deletions>2</deletions>
+    </item>
+    <item>
+      <path>a.rb</path>
+      <churn>3</churn>
+      <commits>1</commits>
+      <additions>2</additions>
+      <deletions>1</deletions>
+    </item>
+  </items>
+</churnReport>
