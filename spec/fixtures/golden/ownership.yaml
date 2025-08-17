@@ -1,0 +1,11 @@
+---
+report: ownership
+items:
+- path: a.rb
+  owner: A <a@ex>
+  owner_share: 60.0
+  authors: 2
+- path: b.rb
+  owner: B <b@ex>
+  owner_share: 40.0
+  authors: 3
