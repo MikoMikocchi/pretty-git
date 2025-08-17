@@ -15,6 +15,18 @@ RSpec.describe PrettyGit::CLI do
     described_class.run(argv.dup, out: out, err: err)
   end
 
+  it 'warns that --theme has no effect when format is non-console' do
+    code = parse_and_run(['summary', '--format', 'json', '--theme', 'bright'])
+    expect(code).to eq(0)
+    expect(err.string).to include('Warning: --theme has no effect when --format=json')
+  end
+
+  it 'warns that --no-color has no effect when format is non-console' do
+    code = parse_and_run(['summary', '--format', 'csv', '--no-color'])
+    expect(code).to eq(0)
+    expect(err.string).to include('Warning: --no-color has no effect when --format=csv')
+  end
+
   it 'returns 1 for invalid --theme value' do
     code = parse_and_run(['authors', '--theme', 'neon'])
     expect(code).to eq(1)

@@ -81,7 +81,10 @@ module PrettyGit
 
       base_ok = valid_base?(options)
       conflicts_ok = validate_conflicts(options, err)
-      return nil if base_ok && conflicts_ok
+      if base_ok && conflicts_ok
+        warn_ignores(options, err)
+        return nil
+      end
 
       print_validation_errors(options, err)
       1
@@ -155,6 +158,21 @@ module PrettyGit
       end
       # time_bucket is accepted by multiple reports historically; do not enforce here.
       ok
+    end
+
+    # Print non-fatal warnings for flags that won't have effect with current options
+    def warn_ignores(options, err)
+      return unless err
+
+      fmt = options[:format]
+      if fmt && fmt != 'console'
+        if options[:theme]
+          err.puts "Warning: --theme has no effect when --format=#{fmt}"
+        end
+        if options[:no_color]
+          err.puts "Warning: --no-color has no effect when --format=#{fmt}"
+        end
+      end
     end
 
     def build_filters(options)
