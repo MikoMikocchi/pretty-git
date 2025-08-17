@@ -20,6 +20,15 @@ rake perf:baseline REPO=/path/to/repo REPORTS="summary,files,authors,languages,a
 - `SINCE`/`UNTIL`: опциональные временные фильтры, прокидываются в CLI.
 - `--allocs`: измерять число аллокаций за итерацию (через `GC.stat`, best‑effort).
 
+### Внутреннее профилирование (PG_PROF)
+
+- Флаг `--prof` для `scripts/perf_baseline.rb` включает ENV `PG_PROF=1` для дочерних процессов `pretty-git`.
+- При включении профилирования stderr каждого запуска сохраняется в файл `perf_profile_<report>_iterNN.log` рядом со скриптом.
+- Профили сейчас покрывают:
+  - `Git::Provider` — общее время, число заголовков коммитов и строк `numstat`.
+  - `Analytics::Languages` — общее время и число обработанных файлов.
+- В логах присутствуют как человекочитаемые строки `[pg_prof]`, так и компактные JSON‑сводки `[pg_prof_json]` для возможного парсинга.
+
 ## Скрипт
 
 Задача делегирует выполнение `scripts/perf_baseline.rb`, который:
@@ -31,6 +40,12 @@ rake perf:baseline REPO=/path/to/repo REPORTS="summary,files,authors,languages,a
 
 ```
 rake perf:baseline REPO=. REPORTS="summary,files" FORMAT=json ITERS=2 -- --allocs
+```
+
+Пример с профилированием:
+
+```
+rake perf:baseline REPO=. REPORTS="languages" FORMAT=json ITERS=1 PERF_ARGS="--prof"
 ```
 
 ## Заметки и советы

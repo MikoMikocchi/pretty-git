@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'time'
+require 'json'
 
 module PrettyGit
   module Analytics
@@ -81,6 +82,8 @@ module PrettyGit
     class Languages
       def self.call(_enum, filters)
         repo = filters.repo_path
+        prof = ENV['PG_PROF'] == '1'
+        t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC) if prof
         items = calculate(repo, include_globs: filters.paths, exclude_globs: filters.exclude_paths)
         metric = (filters.metric || 'bytes').to_s
         totals = compute_totals(items)
@@ -88,7 +91,15 @@ module PrettyGit
         items = add_colors(items)
         items = sort_and_limit(items, filters.limit, metric)
 
-        build_result(repo, items, totals, metric)
+        res = build_result(repo, items, totals, metric)
+        if prof
+          t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          elapsed = (t1 - t0)
+          files = totals[:files]
+          warn format('[pg_prof] languages: time=%.3fs files=%d metric=%s', elapsed, files, metric)
+          warn("[pg_prof_json] #{({ component: 'languages', time_sec: elapsed, files: files, metric: metric }).to_json}")
+        end
+        res
       end
 
       # rubocop:disable Metrics/AbcSize

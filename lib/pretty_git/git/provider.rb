@@ -2,6 +2,7 @@
 
 require 'open3'
 require 'time'
+require 'json'
 require_relative '../types'
 require_relative '../logger'
 require_relative '../utils/path_utils'
@@ -22,6 +23,10 @@ module PrettyGit
       # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       def each_commit
         Enumerator.new do |yld|
+          prof = ENV['PG_PROF'] == '1'
+          t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          headers = 0
+          numstat_lines = 0
           cmd = build_git_command
           PrettyGit::Logger.verbose(
             "[pretty-git] git cmd: #{cmd.join(' ')} (cwd=#{@filters.repo_path})",
@@ -34,6 +39,7 @@ module PrettyGit
               # Try to start a new commit from header on any line
               header = start_commit_from_header(line)
               if header
+                headers += 1 if prof
                 # emit previous commit if any
                 emit_current(yld, current)
                 current = header
@@ -42,6 +48,7 @@ module PrettyGit
 
               next if line.empty?
 
+              numstat_lines += 1 if prof
               append_numstat_line(current, line)
             end
 
@@ -52,6 +59,20 @@ module PrettyGit
               err = stderr.read
               raise StandardError, (err && !err.empty? ? err : "git log failed with status #{status.exitstatus}")
             end
+          end
+
+          t1 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          if prof
+            # Emit a compact profile to stderr
+            elapsed = (t1 - t0)
+            warn format('[pg_prof] git_provider: time=%.3fs headers=%d numstat_lines=%d', elapsed, headers, numstat_lines)
+            summary = {
+              component: 'git_provider',
+              time_sec: elapsed,
+              headers: headers,
+              numstat_lines: numstat_lines
+            }
+            warn("[pg_prof_json] #{summary.to_json}")
           end
         end
       end

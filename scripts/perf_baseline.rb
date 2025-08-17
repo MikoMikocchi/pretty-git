@@ -16,7 +16,8 @@ opts = {
   iters: 3,
   since: nil,
   until_at: nil,
-  allocs: false
+  allocs: false,
+  prof: false
 }
 
 OptionParser.new do |o|
@@ -27,6 +28,7 @@ OptionParser.new do |o|
   o.on('--since T', 'Since datetime (optional)') { |v| opts[:since] = v }
   o.on('--until T', 'Until datetime (optional)') { |v| opts[:until_at] = v }
   o.on('--allocs', 'Capture allocated objects delta via GC.stat (best-effort)') { opts[:allocs] = true }
+  o.on('--prof', 'Enable internal profiling (sets PG_PROF=1) and saves stderr to files') { opts[:prof] = true }
 end.parse!(ARGV)
 
 BIN = File.expand_path(File.join(__dir__, '..', 'bin', 'pretty-git'))
@@ -63,6 +65,8 @@ opts[:reports].each do |report|
     args = [RUBY, BIN, report, opts[:repo], '--format', opts[:format]]
     args += ['--since', opts[:since]] if opts[:since]
     args += ['--until', opts[:until_at]] if opts[:until_at]
+    env = {}
+    env['PG_PROF'] = '1' if opts[:prof]
 
     start_alloc = nil
     if opts[:allocs]
@@ -73,14 +77,29 @@ opts[:reports].each do |report|
       end
     end
     start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    Open3.popen3(*args) do |_stdin, _stdout, _stderr, thr|
-      # Drain output to avoid blocking; we don't need to print it
-      # but read non-blocking could complicate, so just let it flow to /dev/null by not reading.
-      pid = thr.pid
-      pr = rss_kb(pid)
-      peak_rss = [peak_rss, pr.to_i].max if pr
-      status = thr.value
-      warn "Command failed (#{status.exitstatus}): #{args.join(' ')}" unless status.success?
+    if opts[:prof]
+      log = format('perf_profile_%s_iter%02d.log', report, i + 1)
+      File.open(log, 'w') do |f|
+        Open3.popen3(env, *args) do |_stdin, _stdout, stderr, thr|
+          pid = thr.pid
+          pr = rss_kb(pid)
+          peak_rss = [peak_rss, pr.to_i].max if pr
+          copier = Thread.new { IO.copy_stream(stderr, f) }
+          status = thr.value
+          copier.join
+          warn "Command failed (#{status.exitstatus}): #{args.join(' ')}" unless status.success?
+        end
+      end
+    else
+      Open3.popen3(env, *args) do |_stdin, _stdout, _stderr, thr|
+        # Drain output to avoid blocking; we don't need to print it
+        # but read non-blocking could complicate, so just let it flow to /dev/null by not reading.
+        pid = thr.pid
+        pr = rss_kb(pid)
+        peak_rss = [peak_rss, pr.to_i].max if pr
+        status = thr.value
+        warn "Command failed (#{status.exitstatus}): #{args.join(' ')}" unless status.success?
+      end
     end
     elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
     times << elapsed
